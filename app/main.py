@@ -1,8 +1,3 @@
-# before running this please install PySimpleGUI:
-# for windows         python -m pip install PySimpleGUI
-# for mac and linux   python3 -m pip install PySimpleGUI
-
-
 import PySimpleGUI as pg
 
 # TEST CASE before database is linked
