@@ -1,7 +1,6 @@
 import PySimpleGUI as sg
 
 from app.constants import CUSTOMER_NAME
-from app.database.setup import Products, Items
 from app.database.utils import get_categories, get_models
 from app.utils import setup_window, window_size
 
@@ -22,16 +21,8 @@ def customer_screen():
     # all the different tab_layout
     # tab1 main and logout
     main_layout = [[sg.Text(f'Welcome, {CUSTOMER_NAME}. Please click on the tabs to access other functions.')],
-                   [sg.Button('Log Out')]
+                   [sg.Button('Log Out', size=25)]
                    ]
-    # tab2 search & purchase
-    # filters in the dropdown menu; filter by item attributes
-    attributes = ['Color',
-                  'Factory',
-                  'PowerSupply',
-                  'PurchaseStatus',
-                  'ProductionYear',
-                  'ServiceStatus']
 
     categories = get_categories()
     category_row = [sg.Radio('Category', CATEGORY_RADIO, default=True, enable_events=True, key=CATEGORY_RADIO, size=10),
@@ -55,16 +46,16 @@ def customer_screen():
                      model_row,
                      [sg.Text('Filters:')],
                      filter_row,
-                     [sg.Button('Search', key=SEARCH_BUTTON)]
+                     [sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(0, 25))]
                      ]
     # tab3 request/services
     request_layout = [[sg.Text('request servicing for your purchased item here')]
                       # also show purchased items
                       ]
     # tab group
-    tab_layout = [[sg.TabGroup([[sg.Tab('Logout', main_layout)],
-                                [sg.Tab('Search', search_layout)],
-                                [sg.Tab('Request', request_layout)]
+    tab_layout = [[sg.TabGroup([[sg.Tab('Home', [[sg.Column(main_layout, pad=25)]])],
+                                [sg.Tab('Search', [[sg.Column(search_layout, pad=25)]])],
+                                [sg.Tab('Request', [[sg.Column(request_layout, pad=25)]])]
                                 ], size=window_size
                                )]
                   ]
@@ -87,8 +78,6 @@ def customer_screen():
             window[CATEGORY_OPTION].update(disabled=True)
 
         elif event == SEARCH_BUTTON:
-            res = Items.find({"Model": "Light1"})
-            for product in res:
-                print(product)
+            pass
 
     window.close()

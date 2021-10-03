@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
 
-from app.screens.administrator_login import administrator_login_screen
-from app.screens.customer_login import customer_login_screen
+from app.screens.admin.admin_login import administrator_login_screen
+from app.screens.customer.cust_login import customer_login_screen
 from app.constants import ASCII_LOGO
-from app.utils import setup_window, window_size
+from app.utils import setup_window
 
 
 def intro_screen():
@@ -26,7 +26,7 @@ def intro_screen():
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
-        # goes to screens/login.py - open customer login window or admin login window
+        # goes to screens/admin_login.py - open customer login window or admin login window
         elif event == "Customer":
             customer_login_screen(window)
         elif event == "Administrator":
