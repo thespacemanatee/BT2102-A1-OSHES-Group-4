@@ -3,9 +3,6 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`db.OSHES` /*!40100 DEFAULT CHARACTER SE
 USE `db.OSHES`;
 
 
-
-
-
 /*table structure for `CUSTOMER`*/
 DROP TABLE IF EXISTS `customer`;
 
