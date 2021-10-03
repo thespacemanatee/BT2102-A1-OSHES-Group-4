@@ -10,7 +10,7 @@ CREATE TABLE `customer` (
 `customerID` varchar(15) NOT NULL UNIQUE,
 `customerName` varchar(50) NOT NULL,
 `customerGender` char(1) NOT NULL,
-`email` varchar(50) NOT NULL,
+`email` varchar(100) NOT NULL,
 `address` varchar(50) NOT NULL,
 `customerPhone` int(10) NOT NULL,
 `customerPassword` varchar(50) NOT NULL,
@@ -82,6 +82,9 @@ CREATE TABLE `item` (
 `adminID` varchar(15) DEFAULT NULL,
 `productID` varchar(15) NOT NULL,
 PRIMARY KEY (`itemID`),
+KEY `customerID` (`customerID`),
+KEY `adminID` (`adminID`),
+KEY `productID` (`productID`),
 CONSTRAINT `item_ibfk_1` FOREIGN KEY (`customerID`) REFERENCES `customer`(`customerID`),
 CONSTRAINT `item_ibfk_2` FOREIGN KEY (`adminID`) REFERENCES `administrator`(`adminID`),
 CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`productID`) 
