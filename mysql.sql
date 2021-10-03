@@ -1,8 +1,10 @@
-CREATE DATABASE BT2102Assignment1;
+CREATE DATABASE /*!32312 IF NOT EXISTS*/`db.OSHES` /*!40100 DEFAULT CHARACTER SET latin1 */;
+
+USE `db.OSHES`;
 
 DROP TABLE IF EXISTS `customers`;
 CREATE TABLE `customer` (
-`customerID` varchar(15) NOT NULL,
+`customerID` varchar(15) NOT NULL UNIQUE,
 `customerName` varchar(50) NOT NULL,
 `customerGender` char(1) NOT NULL,
 `email` varchar(50) NOT NULL,
@@ -10,19 +12,30 @@ CREATE TABLE `customer` (
 `customerPhone` int(10) NOT NULL,
 `customerPassword` varchar(50) NOT NULL,
 PRIMARY KEY (`customerID`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Data for the table `customers`*/
+
+/*insert into `customers`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
+(*/
+
+/*Table structure for table `administrator` */
 
 DROP TABLE IF EXISTS `administator`;
+
 CREATE TABLE `administrator` (
-`adminID` varchar(15) NOT NULL,
+`adminID` varchar(15) NOT NULL UNIQUE,
 `adminName` varchar(50) NOT NULL,
 `adminGender` char(1) NOT NULL,
 `adminPhone` int(10) NOT NULL,
 `adminPassword` varchar(50) NOT NULL,
 PRIMARY KEY (`adminID`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Table structure for table `request`*/
 
 DROP TABLE IF EXISTS `request`;
+
 CREATE TABLE `request` (
 `customerID` varchar(15) DEFAULT NULL,
 `requestID` varchar(15) DEFAULT NULL,
@@ -32,6 +45,7 @@ CREATE TABLE `request` (
 `requestDate` date DEFAULT NULL,
 `AdminID` varchar(15) DEFAULT NULL,
 PRIMARY KEY (`customerID`, `adminID`),
+KEY
 FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
 );
 
@@ -41,7 +55,7 @@ CREATE TABLE `item` (
 `colour` varchar(50) NOT NULL,
 `powerSupply` varchar(50) NOT NULL,
 `factory` varchar(50) NOT NULL,
-`productionYear` year NOT NULL,
+`productionYear` int NOT NULL,
 `purchaseStatus` varchar(50) NOT NULL,
 `serviceStatus` varchar(50) NOT NULL,
 `purchaseDate` date DEFAULT NULL,
