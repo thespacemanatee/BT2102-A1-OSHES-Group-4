@@ -12,8 +12,8 @@ def administrator_login_screen(intro_window):
               [sg.Text('Password:')],
               [sg.Input(key='pass')],
               [sg.Text(key='wrong_entry')],
-              [sg.Button('Login', size=(25)),
-               sg.Button('Cancel', size=(25))]
+              [sg.Button('Login', size=25),
+               sg.Button('Cancel', size=25)]
               ]
 
     window = setup_window('Customer Login', layout)
