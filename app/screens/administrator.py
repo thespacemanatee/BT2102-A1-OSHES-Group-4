@@ -6,8 +6,7 @@ from constants import ADMIN_NAME
 def administrator_screen():
     # all diff tabs
     # tab1 main and logout
-    admin_main_layout = [[pg.Text('Welcome, '+ADMIN_NAME+'. '
-                                  'Please click on the tabs to access other functions.')],
+    admin_main_layout = [[pg.Text(f'Welcome, {ADMIN_NAME}. Please click on the tabs to access other functions.')],
                          [pg.Button('Log Out')]
                          ]
     # tab2 database initialisation
@@ -32,5 +31,7 @@ def administrator_screen():
                                 ]
                                )]
                   ]
-    admin_main_window = pg.Window(ADMIN_NAME+"'s session", admin_tabs)
+    admin_main_window = pg.Window(f"{ADMIN_NAME}'s session", admin_tabs)
     admin_main_event, admin_main_values = admin_main_window.read()
+    if admin_main_event == 'Log Out':
+        admin_main_window.close()

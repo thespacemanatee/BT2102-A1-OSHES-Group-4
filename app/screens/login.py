@@ -10,9 +10,9 @@ def login_screen(intro_event, intro_values):
     # open customer login window or admin login window
     if intro_event == 'Customer':
         # customer login window
-        cust_login_layout = [[pg.Text("Customer ID:")],
+        cust_login_layout = [[pg.Text('Customer ID:')],
                              [pg.Input(key='id')],
-                             [pg.Text("Password:")],
+                             [pg.Text('Password:')],
                              [pg.Input(key='pass')],
                              [pg.Text(key='wrong_entry')],
                              [pg.Button('OK')]
@@ -28,11 +28,11 @@ def login_screen(intro_event, intro_values):
             cust_login_window['wrong_entry'].update(
                 'You have entered the wrong ID or password.')
 
-    else:
+    elif intro_event == 'Administrator':
         # admin login window
-        admin_login_layout = [[pg.Text("Administrator ID:")],
+        admin_login_layout = [[pg.Text('Administrator ID:')],
                               [pg.Input(key='id')],
-                              [pg.Text("Password:")],
+                              [pg.Text('Password:')],
                               [pg.Input(key='pass')],
                               [pg.Text(key='wrong_entry')],
                               [pg.Button('OK')]
