@@ -21,7 +21,7 @@ def administrator_login_screen(intro_window):
     while True:
         event, values = window.read()
 
-        if event == "Cancel":
+        if event in ("Cancel", sg.WIN_CLOSED):
             break
         
         # check admin ID and password against database

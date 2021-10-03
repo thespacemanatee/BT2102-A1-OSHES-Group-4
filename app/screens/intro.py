@@ -18,9 +18,10 @@ def intro_screen():
     
     while True:
         event, values = window.read()
-        
+        if (event == sg.WIN_CLOSED):
+            break
         # goes to screens/login.py - open customer login window or admin login window
-        if event == "Customer":
+        elif event == "Customer":
             customer_login_screen(window)
         elif event == "Administrator":
             administrator_login_screen(window)
