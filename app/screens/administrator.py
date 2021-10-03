@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 
-from constants import ADMIN_NAME
+from app.constants import ADMIN_NAME
 
 
 def administrator_screen():
