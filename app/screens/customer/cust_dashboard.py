@@ -5,6 +5,7 @@ from app.database.utils import get_categories, get_models, get_colors, get_facto
     get_production_years, get_filtered_results
 from app.utils import setup_window, window_size
 
+RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
 CATEGORY_OPTION = 'category_option'
 SEARCH_BUTTON = 'search_button'
@@ -69,13 +70,15 @@ def customer_screen():
                              col_widths=[19, 19, 19, 19, 19],
                              tooltip='This is a table')]
 
-    search_layout = [[sg.Text('Search by:', font=('Arial', 32), pad=(0, 10))],
+    search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
                      category_row,
                      model_row,
                      [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
                      [colors_filter_row, factories_filter_row, power_supplies_filter_row,
                       production_years_filter_row],
-                     [sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(0, 25))],
+                     [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
+                                  sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
+                                element_justification='center')],
                      table_layout
                      ]
 
@@ -115,5 +118,8 @@ def customer_screen():
             res = get_filtered_results(category=category, model=model, color=color, factory=factory,
                                        power_supply=power_supply, production_year=production_year)
             window['-TABLE-'].update(values=res)
+
+        elif event == RESET_BUTTON:
+            window['-TABLE-'].update(values=get_filtered_results())
 
     window.close()

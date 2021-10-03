@@ -2,7 +2,6 @@ import PySimpleGUI as sg
 
 from screens.intro import intro_screen
 
-
 sg.change_look_and_feel('Reddit')
 sg.set_options(font=("Arial", 16))
 
