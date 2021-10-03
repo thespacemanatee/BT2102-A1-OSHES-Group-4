@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
 
-from screens.customer import customer_screen
-from utils import setup_window
-from constants import CUSTOMER_ID, PASSWORD
+from app.screens.customer import customer_screen
+from app.utils import setup_window
+from app.constants import CUSTOMER_ID, PASSWORD
 
 
 def customer_login_screen(intro_window):

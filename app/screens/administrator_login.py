@@ -1,8 +1,8 @@
 import PySimpleGUI as sg
 
-from screens.administrator import administrator_screen
-from utils import setup_window
-from constants import ADMINISTRATOR_ID, PASSWORD
+from app.screens.administrator import administrator_screen
+from app.utils import setup_window
+from app.constants import ADMINISTRATOR_ID, PASSWORD
 
 
 def administrator_login_screen(intro_window):

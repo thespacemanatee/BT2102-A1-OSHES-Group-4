@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 
-from constants import CUSTOMER_NAME
-from database.setup import Products, Items
+from app.constants import CUSTOMER_NAME
+from app.database.setup import Products, Items
 
 
 def customer_screen():

@@ -1,9 +1,9 @@
 import PySimpleGUI as sg
 
-from screens.administrator_login import administrator_login_screen
-from screens.customer_login import customer_login_screen
-from constants import ASCII_LOGO
-from utils import setup_window
+from app.screens.administrator_login import administrator_login_screen
+from app.screens.customer_login import customer_login_screen
+from app.constants import ASCII_LOGO
+from app.utils import setup_window
 
 
 def intro_screen():
