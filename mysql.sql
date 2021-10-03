@@ -2,7 +2,13 @@ CREATE DATABASE /*!32312 IF NOT EXISTS*/`db.OSHES` /*!40100 DEFAULT CHARACTER SE
 
 USE `db.OSHES`;
 
-DROP TABLE IF EXISTS `customers`;
+
+
+
+
+/*table structure for `CUSTOMER`*/
+DROP TABLE IF EXISTS `customer`;
+
 CREATE TABLE `customer` (
 `customerID` varchar(15) NOT NULL UNIQUE,
 `customerName` varchar(50) NOT NULL,
@@ -14,13 +20,15 @@ CREATE TABLE `customer` (
 PRIMARY KEY (`customerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `customers`*/
-
-/*insert into `customers`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
+/*Data for the table `customer`*/
+/*insert into `customer`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
 (*/
 
-/*Table structure for table `administrator` */
 
+
+
+
+/*Table structure for table `ADMINISTRATOR` */
 DROP TABLE IF EXISTS `administator`;
 
 CREATE TABLE `administrator` (
@@ -32,8 +40,14 @@ CREATE TABLE `administrator` (
 PRIMARY KEY (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Table structure for table `request`*/
+/*Data for the table `administrator*/
+/*insert into `administrator`(`adminID`, `adminName`, adminGender`, `adminPhone`, `adminPassword`) values */
 
+
+
+
+
+/*Table structure for table `REQUEST`*/
 DROP TABLE IF EXISTS `request`;
 
 CREATE TABLE `request` (
@@ -45,37 +59,57 @@ CREATE TABLE `request` (
 `requestDate` date DEFAULT NULL,
 `AdminID` varchar(15) DEFAULT NULL,
 PRIMARY KEY (`customerID`, `adminID`),
-KEY
-FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
-);
+CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+/*Data for the table `request` */
+/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `AdminID`) values */
+
+
+
+
+
+/*Table stucture for table `ITEM`*/
 DROP TABLE IF EXISTS `item`;
+
 CREATE TABLE `item` (
-`itemID` varchar(15) NOT NULL,
+`itemID` varchar(15) NOT NULL UNIQUE,
 `colour` varchar(50) NOT NULL,
 `powerSupply` varchar(50) NOT NULL,
 `factory` varchar(50) NOT NULL,
 `productionYear` int NOT NULL,
 `purchaseStatus` varchar(50) NOT NULL,
-`serviceStatus` varchar(50) NOT NULL,
+`serviceStatus` varchar(50) DEFAULT 'N/A',
 `purchaseDate` date DEFAULT NULL,
 `customerID` varchar(15) DEFAULT NULL,
 `adminID` varchar(15) DEFAULT NULL,
 `productID` varchar(15) NOT NULL,
 PRIMARY KEY (`itemID`),
-FOREIGN KEY (`customerID`) REFERENCES `customer`(`customerID`),
-FOREIGN KEY (`adminID`) REFERENCES `administrator`(`adminID`),
-FOREIGN KEY (`productID`) REFERENCES `product`(`productID`) 
-);
+CONSTRAINT `item_ibfk_1` FOREIGN KEY (`customerID`) REFERENCES `customer`(`customerID`),
+CONSTRAINT `item_ibfk_2` FOREIGN KEY (`adminID`) REFERENCES `administrator`(`adminID`),
+CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`productID`) 
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
+/*Data for the table `item`*/
+/*insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values */
+
+
+
+
+
+/* Table structure for `PRODUCT`*/
 DROP TABLE IF EXISTS `product`;
+
 CREATE TABLE `product` (
-`productID` varchar(15) NOT NULL,
+`productID` varchar(15) NOT NULL UNIQUE,
 `category` varchar(50) NOT NULL,
 `model` varchar(50) NOT NULL,
 `cost` decimal(10,2) NOT NULL,
 `price` decimal(10,2) NOT NULL,
 `warranty` int NOT NULL,
 PRIMARY KEY (`productID`)
-);
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*Data for the table `product`*/
+/*insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values */
 
