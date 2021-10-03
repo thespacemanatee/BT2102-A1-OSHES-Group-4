@@ -15,10 +15,12 @@ def intro_screen():
                      ]
     layout = [[sg.Column(layout_column, element_justification='center')]]
     window = setup_window('OSHES - Group 4', layout)
-    event, values = window.read()
-    window.close()
-    # goes to screens/login.py - open customer login window or admin login window
-    if event == "Customer":
-        customer_login_screen()
-    elif event == "Administrator":
-        administrator_login_screen()
+    
+    while True:
+        event, values = window.read()
+        
+        # goes to screens/login.py - open customer login window or admin login window
+        if event == "Customer":
+            customer_login_screen(window)
+        elif event == "Administrator":
+            administrator_login_screen(window)

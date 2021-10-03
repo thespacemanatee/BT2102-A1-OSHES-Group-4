@@ -5,7 +5,7 @@ from utils import setup_window
 from constants import CUSTOMER_ID, PASSWORD
 
 
-def customer_login_screen():
+def customer_login_screen(intro_window):
     # customer login window
     layout = [[sg.Text('Customer ID:')],
               [sg.Input(key='id')],
@@ -15,20 +15,21 @@ def customer_login_screen():
               [sg.Button('Login', size=(25)),
                sg.Button('Cancel', size=(25))]
               ]
+    
     window = setup_window('Customer Login', layout)
 
     while True:
         event, values = window.read()
-        # print(cust_login_values)
-        # check customer ID and password against database
-        if values['id'] == CUSTOMER_ID and values['pass'] == PASSWORD:
-            customer_screen()
+        if event == "Cancel":
             break
+        
+        # check customer ID and password against database
+        elif values['id'] == CUSTOMER_ID and values['pass'] == PASSWORD:
+            window.close()
+            intro_window.close()
+            customer_screen()
         else:
             window['wrong_entry'].update(
                 'You have entered the wrong ID or password.')
-
-        if event == "Cancel":
-            break
 
     window.close()
