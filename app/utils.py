@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 
-
 window_size = (1200, 800)
+
 
 def setup_window(title: str, layout):
     """
@@ -10,4 +10,4 @@ def setup_window(title: str, layout):
     @param layout: A PySimpleGUI layout object
     """
 
-    return sg.Window(title, layout, resizable=True, size=window_size, finalize=True)
+    return sg.Window(title, layout, size=window_size, finalize=True)
