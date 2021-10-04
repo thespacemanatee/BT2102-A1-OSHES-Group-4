@@ -30,32 +30,39 @@ table_headers = [
 
 
 def customer_screen():
-    main_layout = [[sg.Text(f'Welcome, {CUSTOMER_NAME}. Please click on the tabs to access other functions.')],
-                   [sg.Button('Log Out', size=25)]
-                   ]
+    main_layout = [[sg.Text(f'Welcome, {CUSTOMER_NAME}.', font=('Arial', 32))]]
 
     categories = get_categories()
+    cat = categories if len(categories) > 0 else ['Null']
     category_row = [sg.Radio('Category', CATEGORY_RADIO, default=True, enable_events=True, key=CATEGORY_RADIO, size=10),
-                    sg.OptionMenu(categories, default_value=categories[0], disabled=False, key=CATEGORY_OPTION,
+                    sg.OptionMenu(cat, default_value=cat[0], disabled=False, key=CATEGORY_OPTION,
                                   size=10)]
 
     models = get_models()
+    mod = models if len(models) > 0 else ['Null']
     model_row = [sg.Radio('Model', MODEL_RADIO, default=False, enable_events=True, key=MODEL_RADIO, size=10),
-                 sg.OptionMenu(models, default_value=models[0], disabled=True, key=MODEL_OPTION, size=10)]
+                 sg.OptionMenu(mod, default_value=mod[0], disabled=True, key=MODEL_OPTION, size=10)]
 
     colors = get_colors()
+    col = categories if len(categories) > 0 else ['Null']
     colors_filter_row = sg.Column([[sg.Checkbox('Color', key=COLOR_CHECKBOX),
-                                    sg.OptionMenu(colors, default_value=colors[0], key=COLOR_CHECKBOX_VAL)]])
+                                    sg.OptionMenu(col, default_value=col[0], key=COLOR_CHECKBOX_VAL)]])
+
     factories = get_factories()
+    fac = factories if len(factories) > 0 else ['Null']
     factories_filter_row = sg.Column([[sg.Checkbox('Factory', key=FACTORY_CHECKBOX),
-                                       sg.OptionMenu(factories, default_value=factories[0], key=FACTORY_CHECKBOX_VAL)]])
+                                       sg.OptionMenu(fac, default_value=fac[0], key=FACTORY_CHECKBOX_VAL)]])
+    
     power_supplies = get_power_supplies()
+    pow_sup = power_supplies if len(power_supplies) > 0 else ['Null']
     power_supplies_filter_row = sg.Column([[sg.Checkbox('Power Supply', key=POWER_SUPPLY_CHECKBOX),
-                                            sg.OptionMenu(power_supplies, default_value=power_supplies[0],
+                                            sg.OptionMenu(pow_sup, default_value=pow_sup[0],
                                                           key=POWER_SUPPLY_CHECKBOX_VAL)]])
+
     production_years = get_production_years()
+    prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = sg.Column([[sg.Checkbox('Production Years', key=PRODUCTION_YEAR_CHECKBOX),
-                                              sg.OptionMenu(production_years, default_value=production_years[0],
+                                              sg.OptionMenu(prod, default_value=prod[0],
                                                             key=PRODUCTION_YEARS_CHECKBOX_VAL)]])
 
     table_layout = [sg.Table(values=get_filtered_results(), headings=table_headers,
@@ -67,7 +74,8 @@ def customer_screen():
                              key='-TABLE-',
                              row_height=35,
                              col_widths=[19, 19, 19, 19, 19],
-                             tooltip='This is a table')]
+                             tooltip='Search Results',
+                             enable_events=True)]
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
                      category_row,
@@ -83,14 +91,18 @@ def customer_screen():
 
     request_layout = [[sg.Text('request servicing for your purchased item here')]]
 
+    logout_layout = [sg.Column([[sg.Text('', pad=(0, 0), key='-EXPAND-'), sg.Button('Log Out')]], justification='right')]
+    
     tab_layout = [[sg.TabGroup([[sg.Tab('        Home        ', [[sg.Column(main_layout, pad=25)]])],
-                                [sg.Tab('        Search       ', [[sg.Column(search_layout, pad=25)]])],
-                                [sg.Tab('        Request      ', [[sg.Column(request_layout, pad=25)]])]
+                                [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
+                                [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
+                                logout_layout,
                                 ], size=window_size
                                )]
                   ]
 
     window = setup_window(f"{CUSTOMER_NAME}'s session", tab_layout)
+    window['-EXPAND-'].expand(True, True, True)
 
     while True:
         event, values = window.read()
