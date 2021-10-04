@@ -65,7 +65,7 @@ CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `request` */
-/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `AdminID`) values */
+/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `adminID`) values */
 
 
 
