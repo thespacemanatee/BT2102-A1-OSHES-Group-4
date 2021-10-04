@@ -17,15 +17,17 @@ CREATE TABLE `customer` (
 PRIMARY KEY (`customerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `customer`*/
-/*insert into `customer`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
-(*/
+/*data for the table `customer`*/
+insert into `customer`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
+('id1', 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
+('id2', 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
+('id3', 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
 
 
 
 
 
-/*Table structure for table `ADMINISTRATOR` */
+/*table structure for table `ADMINISTRATOR` */
 DROP TABLE IF EXISTS `administator`;
 
 CREATE TABLE `administrator` (
@@ -37,14 +39,17 @@ CREATE TABLE `administrator` (
 PRIMARY KEY (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `administrator*/
-/*insert into `administrator`(`adminID`, `adminName`, adminGender`, `adminPhone`, `adminPassword`) values */
+/*data for the table `administrator*/
+insert into `administrator`(`adminID`, `adminName`, adminGender`, `adminPhone`, `adminPassword`) values
+('id4', 'Dina', 'F', 1234568790, 'pass4'),
+('id5', 'Ferb', 'M', 1234576890, 'pass5'),
+('id6', 'Greg', 'M', 1234657890, 'pass6');
 
 
 
 
 
-/*Table structure for table `REQUEST`*/
+/*table structure for table `REQUEST`*/
 DROP TABLE IF EXISTS `request`;
 
 CREATE TABLE `request` (
@@ -54,19 +59,19 @@ CREATE TABLE `request` (
 `servicePaymentDate` date DEFAULT NULL,
 `requestStatus` varchar(50) DEFAULT 'N/A',
 `requestDate` date DEFAULT NULL,
-`AdminID` varchar(15) DEFAULT NULL,
-PRIMARY KEY (`customerID`, `adminID`),
+`adminID` varchar(15) DEFAULT NULL,
+PRIMARY KEY (`customerID`, `requestID`),
 CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `request` */
+/*data for the table `request` */
 /*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `AdminID`) values */
 
 
 
 
 
-/*Table stucture for table `ITEM`*/
+/*table stucture for table `ITEM`*/
 DROP TABLE IF EXISTS `item`;
 
 CREATE TABLE `item` (
@@ -90,14 +95,14 @@ CONSTRAINT `item_ibfk_2` FOREIGN KEY (`adminID`) REFERENCES `administrator`(`adm
 CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`productID`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `item`*/
+/*data for the table `item`*/
 /*insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values */
 
 
 
 
 
-/* Table structure for `PRODUCT`*/
+/* table structure for `PRODUCT`*/
 DROP TABLE IF EXISTS `product`;
 
 CREATE TABLE `product` (
@@ -110,6 +115,11 @@ CREATE TABLE `product` (
 PRIMARY KEY (`productID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*Data for the table `product`*/
+/*data for the table `product`*/
 /*insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values */
+
+/*to return if the item purchased is still under warranty*/ /*STILL UNSURE*/
+SELECT itemID, T2.warranty >= DATEDIFF(month, requestDate, purchaseDate) AS warranty_status from item AS T1 
+LEFT JOIN product as T2 ON T1.productID = T2.productID
+LEFT JOIN request as T3 ON T1.customerID = T3.customerID;
 
