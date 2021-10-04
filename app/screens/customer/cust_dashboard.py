@@ -44,7 +44,7 @@ def customer_screen():
                  sg.OptionMenu(mod, default_value=mod[0], disabled=True, key=MODEL_OPTION, size=10)]
 
     colors = get_colors()
-    col = categories if len(categories) > 0 else ['Null']
+    col = colors if len(colors) > 0 else ['Null']
     colors_filter_row = sg.Column([[sg.Checkbox('Color', key=COLOR_CHECKBOX),
                                     sg.OptionMenu(col, default_value=col[0], key=COLOR_CHECKBOX_VAL)]])
 
