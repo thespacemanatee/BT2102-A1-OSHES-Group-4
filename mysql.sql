@@ -18,7 +18,7 @@ PRIMARY KEY (`customerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `customer`*/
-insert into `customer`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
+insert into `customer`(`customerID`, `customerName`, `customerGender`, `email`, `address`, `customerPhone`, `customerPassword`) values
 ('id1', 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
 ('id2', 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
 ('id3', 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
@@ -40,7 +40,7 @@ PRIMARY KEY (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `administrator*/
-insert into `administrator`(`adminID`, `adminName`, adminGender`, `adminPhone`, `adminPassword`) values
+insert into `administrator`(`adminID`, `adminName`, `adminGender`, `adminPhone`, `adminPassword`) values
 ('id4', 'Dina', 'F', 1234568790, 'pass4'),
 ('id5', 'Ferb', 'M', 1234576890, 'pass5'),
 ('id6', 'Greg', 'M', 1234657890, 'pass6');
@@ -65,7 +65,7 @@ CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `request` */
-/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `AdminID`) values */
+/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `adminID`) values */
 
 
 
