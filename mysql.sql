@@ -1,4 +1,4 @@
-CREATE DATABASE /*!32312 IF NOT EXISTS*/`db.OSHES` /*!40100 DEFAULT CHARACTER SET latin1 */;
+CREATE DAcustomerTABASE /*!32312 IF NOT EXISTS*/`db.OSHES` /*!40100 DEFAULT CHARACTER SET latin1 */;
 
 USE `db.OSHES`;
 
@@ -18,7 +18,7 @@ PRIMARY KEY (`customerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `customer`*/
-insert into `customer`(`customerID`, `customerName`, customerGender`, `email`, `address`, customerPhone`, customerPassword`) values
+insert into `customer`(`customerID`, `customerName`, `customerGender`, `email`, `address`, `customerPhone`, `customerPassword`) values
 ('id1', 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
 ('id2', 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
 ('id3', 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
@@ -40,7 +40,7 @@ PRIMARY KEY (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `administrator*/
-insert into `administrator`(`adminID`, `adminName`, adminGender`, `adminPhone`, `adminPassword`) values
+insert into `administrator`(`adminID`, `adminName`, `adminGender`, `adminPhone`, `adminPassword`) values
 ('id4', 'Dina', 'F', 1234568790, 'pass4'),
 ('id5', 'Ferb', 'M', 1234576890, 'pass5'),
 ('id6', 'Greg', 'M', 1234657890, 'pass6');
