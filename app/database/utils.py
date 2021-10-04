@@ -26,24 +26,30 @@ def get_production_years():
 
 
 def get_filtered_results(category=None, model=None, color=None, factory=None, power_supply=None, production_year=None):
-    filter_criteria = {}
+    filter_by = {}
     projection = ['Category', 'Model', 'Price ($)', 'Warranty (months)']
     if category:
-        filter_criteria['Category'] = category
+        filter_by['Category'] = category
     elif model:
-        filter_criteria['Model'] = model
-    if color:
-        filter_criteria['Color'] = color
-    if factory:
-        filter_criteria['Factory'] = factory
-    if power_supply:
-        filter_criteria['PowerSupply'] = power_supply
-    if production_year:
-        filter_criteria['ProductionYear'] = production_year
+        filter_by['Model'] = model
 
-    res = list(Products.find(filter_criteria, projection))
+    res = list(Products.find(filter_by, projection))
     final = []
-    for item in res:
-        final.append(list(item.values())[1:])
+    for product in res:
+        filter_criteria = {}
+        filter_criteria['Category'] = product['Category']
+        filter_criteria['Model'] = product['Model']
+        if color:
+            filter_criteria['Color'] = color
+        if factory:
+            filter_criteria['Factory'] = factory
+        if power_supply:
+            filter_criteria['PowerSupply'] = power_supply
+        if production_year:
+            filter_criteria['ProductionYear'] = production_year
+        filter_res = list(Items.find(filter_criteria))
+        temp = list(product.values())
+        temp.append(len(filter_res))
+        final.append(temp[1:])
 
     return final
