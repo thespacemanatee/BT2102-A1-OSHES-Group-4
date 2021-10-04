@@ -58,11 +58,10 @@ def customer_screen():
                                               sg.OptionMenu(production_years, default_value=production_years[0],
                                                             key=PRODUCTION_YEARS_CHECKBOX_VAL)]])
 
-    table_layout = [sg.Table(values=get_filtered_results(), headings=table_headers, max_col_width=25,
-                             # background_color='light blue',
+    table_layout = [sg.Table(values=get_filtered_results(), headings=table_headers,
                              auto_size_columns=False,
                              display_row_numbers=True,
-                             justification='right',
+                             justification='left',
                              num_rows=20,
                              alternating_row_color='lightyellow',
                              key='-TABLE-',
