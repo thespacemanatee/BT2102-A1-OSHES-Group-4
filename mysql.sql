@@ -118,8 +118,3 @@ PRIMARY KEY (`productID`)
 /*data for the table `product`*/
 /*insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values */
 
-/*to return if the item purchased is still under warranty*/ /*STILL UNSURE*/
-SELECT itemID, T2.warranty >= DATEDIFF(month, requestDate, purchaseDate) AS warranty_status from item AS T1 
-LEFT JOIN product as T2 ON T1.productID = T2.productID
-LEFT JOIN request as T3 ON T1.customerID = T3.customerID;
-
