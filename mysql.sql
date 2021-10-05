@@ -57,7 +57,7 @@ CREATE TABLE `request` (
 `requestID` varchar(15) DEFAULT NULL,
 `serviceAmount` decimal(10,2) DEFAULT NULL,
 `servicePaymentDate` date DEFAULT NULL,
-`requestStatus` varchar(50) DEFAULT 'N/A',
+`requestStatus` varchar(50) DEFAULT '',
 `requestDate` date DEFAULT NULL,
 `adminID` varchar(15) DEFAULT NULL,
 PRIMARY KEY (`customerID`, `requestID`),
@@ -75,17 +75,17 @@ CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (
 DROP TABLE IF EXISTS `item`;
 
 CREATE TABLE `item` (
-`itemID` varchar(15) NOT NULL UNIQUE,
+`itemID` int(4) NOT NULL UNIQUE,
 `colour` varchar(50) NOT NULL,
 `powerSupply` varchar(50) NOT NULL,
 `factory` varchar(50) NOT NULL,
 `productionYear` int NOT NULL,
-`purchaseStatus` varchar(50) NOT NULL,
-`serviceStatus` varchar(50) DEFAULT 'N/A',
+`purchaseStatus` varchar(6) NOT NULL,
+`serviceStatus` varchar(50) DEFAULT '',
 `purchaseDate` date DEFAULT NULL,
 `customerID` varchar(15) DEFAULT NULL,
 `adminID` varchar(15) DEFAULT NULL,
-`productID` varchar(15) NOT NULL,
+`productID` int NOT NULL,
 PRIMARY KEY (`itemID`),
 KEY `customerID` (`customerID`),
 KEY `adminID` (`adminID`),
@@ -106,7 +106,7 @@ CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`product
 DROP TABLE IF EXISTS `product`;
 
 CREATE TABLE `product` (
-`productID` varchar(15) NOT NULL UNIQUE,
+`productID` int NOT NULL UNIQUE,
 `category` varchar(50) NOT NULL,
 `model` varchar(50) NOT NULL,
 `cost` decimal(10,2) NOT NULL,
