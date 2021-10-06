@@ -9,6 +9,57 @@ def initialise_mysql_database():
             continue
 
 
+def is_admin_username_taken(username):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('SELECT id FROM administrator WHERE id = %s', (username,))
+    cursor.fetchone()
+
+    return True if cursor.rowcount > 0 else False
+
+
+def is_customer_username_taken(username):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('SELECT id FROM customer WHERE id = %s', (username,))
+    cursor.fetchone()
+
+    return True if cursor.rowcount > 0 else False
+
+
+def insert_administrator(username, name, gender, phone, password):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('INSERT INTO administrator (id, name, gender, phone, password) VALUES (%s,%s, %s, %s, %s)',
+                   (username, name, gender, phone, password))
+    mysql_client.commit()
+
+    return cursor.lastrowid
+
+
+def insert_customer(username, name, gender, email, address, phone, password):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute(
+        'INSERT INTO customer (id, name, gender, email, address, phone, password) VALUES (%s,%s, %s, %s, %s, %s, %s)',
+        (username, name, gender, email, address, phone, password))
+    mysql_client.commit()
+
+    return cursor.lastrowid
+
+
+def validate_administrator_login(username, password):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('SELECT * FROM administrator WHERE id = %s AND password = %s', (username, password))
+    results = cursor.fetchone()
+
+    if results is None:
+        return False, "", "", "", ""
+
+    return True, results[0], results[1], results[2], results[3]
+
+
 def get_categories():
     return list(Products.find().distinct('Category'))
 

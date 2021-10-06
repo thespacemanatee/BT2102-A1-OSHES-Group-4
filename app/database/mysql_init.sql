@@ -6,7 +6,7 @@ USE `db.OSHES`;
 
 CREATE TABLE `customer`
 (
-    `id`       int         NOT NULL AUTO_INCREMENT,
+    `id`       varchar(50) NOT NULL,
     `name`     varchar(50) NOT NULL,
     `gender`   varchar(50) NOT NULL,
     `email`    varchar(50) NOT NULL,
@@ -24,7 +24,7 @@ CREATE TABLE `customer`
 
 CREATE TABLE `administrator`
 (
-    `id`       int         NOT NULL AUTO_INCREMENT,
+    `id`       varchar(50) NOT NULL,
     `name`     varchar(50) NOT NULL,
     `gender`   varchar(50) NOT NULL,
     `phone`    int(20)     NOT NULL,
@@ -45,7 +45,7 @@ CREATE TABLE `request`
     `service_payment_date` date           DEFAULT NULL,
     `request_status`       varchar(50) NOT NULL,
     `request_date`         date        NOT NULL,
-    `admin_id`             int            DEFAULT NULL,
+    `admin_id`             varchar(50)    DEFAULT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `request_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
 );
@@ -79,8 +79,8 @@ CREATE TABLE `item`
     `purchase_status` varchar(6)  NOT NULL,
     `service_status`  varchar(50) DEFAULT '',
     `purchase_date`   date        DEFAULT NULL,
-    `customer_id`     int         DEFAULT NULL,
-    `admin_id`        int         DEFAULT NULL,
+    `customer_id`     varchar(50) DEFAULT NULL,
+    `admin_id`        varchar(50) DEFAULT NULL,
     `product_id`      int         NOT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `item_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),

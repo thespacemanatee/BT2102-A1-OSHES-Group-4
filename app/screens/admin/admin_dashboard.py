@@ -32,9 +32,10 @@ TABLE_HEADERS = [
 ]
 
 
-def administrator_screen():
-    main_layout = [[sg.Text(f'Welcome, {ADMIN_NAME}.', font=('Arial', 32))],
-                   [sg.Text(f'Payment  Pending', font=('Arial', 24))]]
+def administrator_screen(admin_id, name, gender, phone):
+    print(admin_id, name, gender, phone)
+    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))],
+                   [sg.Text(f'Payment Pending', font=('Arial', 24))]]
 
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']

@@ -1,6 +1,6 @@
 import PySimpleGUI as sg
 
-from app.database.utils import initialise_mysql_database
+from app.database.utils import initialise_mysql_database, validate_administrator_login
 from app.screens.admin.admin_dashboard import administrator_screen
 from app.screens.admin.admin_register import administrator_register_screen
 from app.utils import setup_window
@@ -35,21 +35,22 @@ def administrator_login_screen(intro_window):
 
         elif event == "Register":
             window.close()
-            administrator_register_screen()
+            administrator_register_screen(intro_window)
             break
 
         # check admin ID and password against database
-        elif values[ID_VAL] == ADMINISTRATOR_ID and values[PASSWORD_VAL] == PASSWORD:
-            intro_window.close()
-            window.close()
-            administrator_screen()
-            break
+        elif event == 'Login':
+            valid, admin_id, name, gender, phone = validate_administrator_login(values[ID_VAL], values[PASSWORD_VAL])
+            if valid:
+                intro_window.close()
+                window.close()
+                administrator_screen(admin_id, name, gender, phone)
+                break
+            else:
+                window[WRONG_ENTRY].update(
+                    'You have entered the wrong ID or password.', text_color='red')
 
         elif event == 'Initialise Database':
             initialise_mysql_database()
-
-        else:
-            window[WRONG_ENTRY].update(
-                'You have entered the wrong ID or password.', text_color='red')
 
     window.close()
