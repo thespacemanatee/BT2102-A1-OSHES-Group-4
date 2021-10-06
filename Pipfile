@@ -6,6 +6,7 @@ name = "pypi"
 [packages]
 pysimplegui = "*"
 pymongo = "*"
+mysql-connector-python = "*"
 
 [dev-packages]
 
