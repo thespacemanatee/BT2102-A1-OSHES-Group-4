@@ -48,7 +48,7 @@ CREATE TABLE `request`
     `customer_id`          varchar(50)    DEFAULT NULL,
     `admin_id`             varchar(50)    DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
+    CONSTRAINT `request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
     CONSTRAINT `request_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
 );
 
