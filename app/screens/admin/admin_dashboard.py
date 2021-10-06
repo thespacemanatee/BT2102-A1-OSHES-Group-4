@@ -4,6 +4,7 @@ from app.components.category_component import category_component, CATEGORY_RADIO
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
 from app.components.item_search_component import item_search_component, ITEM_SEARCH_VAL, ITEM_SEARCH_RADIO
+from app.components.item_summary_popup import item_summary_popup
 from app.components.model_component import model_component, MODEL_RADIO
 from app.components.power_supplies_component import power_supplies_filter_component, POWER_SUPPLY_CHECKBOX_VAL, \
     POWER_SUPPLY_CHECKBOX
@@ -12,7 +13,7 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.constants import ADMIN_NAME
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results
+    get_production_years, get_filtered_results, find_item_by_id
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
 from app.utils import setup_window
 
@@ -119,13 +120,10 @@ def administrator_screen():
             window[CATEGORY_OPTION].update(disabled=True)
 
         elif event == SEARCH_BUTTON:
-            if values[ITEM_SEARCH_RADIO] and values[ITEM_SEARCH_VAL]:
-                choice, _ = sg.Window('Continue?', [[sg.T('Do you want to continue?')], [sg.Ok(s=10)]],
-                                      keep_on_top=True).read(close=True)
-
-            elif values[ITEM_SEARCH_RADIO] and not values[ITEM_SEARCH_VAL]:
-                choice, _ = sg.Window('Error', [[sg.T('Please enter an Item Id')], [sg.Ok(s=10)]],
-                                      keep_on_top=True).read(close=True)
+            if values[ITEM_SEARCH_RADIO]:
+                user_input = values[ITEM_SEARCH_VAL]
+                res = find_item_by_id(user_input)
+                item_summary_popup(user_input, res)
 
             elif not values[ITEM_SEARCH_RADIO]:
                 category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None

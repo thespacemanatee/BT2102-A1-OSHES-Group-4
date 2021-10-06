@@ -71,3 +71,7 @@ def get_filtered_results(admin=False, category=None, model=None,
         final.append(temp)
 
     return final
+
+
+def find_item_by_id(item_id):
+    return Items.find_one({'ItemID': item_id})
