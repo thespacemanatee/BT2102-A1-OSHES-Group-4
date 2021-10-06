@@ -7,7 +7,7 @@ USE `db.OSHES`;
 DROP TABLE IF EXISTS `customer`;
 
 CREATE TABLE `customer` (
-`customerID` varchar(15) NOT NULL UNIQUE,
+`customerID` int AUTO_INCREMENT,
 `customerName` varchar(50) NOT NULL,
 `customerGender` char(1) NOT NULL,
 `email` varchar(100) NOT NULL,
@@ -19,19 +19,19 @@ PRIMARY KEY (`customerID`)
 
 /*data for the table `customer`*/
 insert into `customer`(`customerID`, `customerName`, `customerGender`, `email`, `address`, `customerPhone`, `customerPassword`) values
-('id1', 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
-('id2', 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
-('id3', 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
+(1, 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
+(2, 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
+(3, 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
 
 
 
 
 
 /*table structure for table `ADMINISTRATOR` */
-DROP TABLE IF EXISTS `administator`;
+DROP TABLE IF EXISTS `administrator`;
 
 CREATE TABLE `administrator` (
-`adminID` varchar(15) NOT NULL UNIQUE,
+`adminID` int AUTO_INCREMENT,
 `adminName` varchar(50) NOT NULL,
 `adminGender` char(1) NOT NULL,
 `adminPhone` int(10) NOT NULL,
@@ -53,19 +53,39 @@ insert into `administrator`(`adminID`, `adminName`, `adminGender`, `adminPhone`,
 DROP TABLE IF EXISTS `request`;
 
 CREATE TABLE `request` (
-`customerID` varchar(15) DEFAULT NULL,
-`requestID` varchar(15) DEFAULT NULL,
+`requestID` int AUTO_INCREMENT,
 `serviceAmount` decimal(10,2) DEFAULT NULL,
 `servicePaymentDate` date DEFAULT NULL,
 `requestStatus` varchar(50) DEFAULT '',
 `requestDate` date DEFAULT NULL,
 `adminID` varchar(15) DEFAULT NULL,
-PRIMARY KEY (`customerID`, `requestID`),
+PRIMARY KEY (`requestID`),
 CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `request` */
-/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `adminID`) values */
+/*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `adminID`) values
+('id1', 001, 0.00, '13-01-21', 'submitted', '12-01-21', 'id6');*/
+
+
+
+
+/* table structure for `PRODUCT`*/
+DROP TABLE IF EXISTS `product`;
+
+CREATE TABLE `product` (
+`productID` int UNIQUE,
+`category` varchar(50) NOT NULL,
+`model` varchar(50) NOT NULL,
+`cost` decimal(10,2) NOT NULL,
+`price` decimal(10,2) NOT NULL,
+`warranty` int NOT NULL,
+PRIMARY KEY (`productID`)
+) ENGINE=InnoDB DEFAULT CHARSET=latin1;
+
+/*data for the table `product`*/
+insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values
+(1, 'light', 'safehome', 89.00, 120.00, 6);
 
 
 
@@ -96,25 +116,9 @@ CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`product
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
 /*data for the table `item`*/
-/*insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values */
+insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values
+('1001', 'black', 'battery', 'malaysia', 2014, 'sold', '', '23-01-21', 'id1', 'id4', 1);
 
 
 
-
-
-/* table structure for `PRODUCT`*/
-DROP TABLE IF EXISTS `product`;
-
-CREATE TABLE `product` (
-`productID` int NOT NULL UNIQUE,
-`category` varchar(50) NOT NULL,
-`model` varchar(50) NOT NULL,
-`cost` decimal(10,2) NOT NULL,
-`price` decimal(10,2) NOT NULL,
-`warranty` int NOT NULL,
-PRIMARY KEY (`productID`)
-) ENGINE=InnoDB DEFAULT CHARSET=latin1;
-
-/*data for the table `product`*/
-/*insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values */
 
