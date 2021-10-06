@@ -40,14 +40,16 @@ CREATE TABLE `administrator`
 
 CREATE TABLE `request`
 (
-    `id`                   int         NOT NULL AUTO_INCREMENT,
+    `id`                   int            NOT NULL AUTO_INCREMENT,
     `service_amount`       decimal(10, 2) DEFAULT NULL,
     `service_payment_date` date           DEFAULT NULL,
-    `request_status`       varchar(50) NOT NULL,
-    `request_date`         date        NOT NULL,
+    `request_status`       varchar(50)    NOT NULL,
+    `request_date`         date           NOT NULL,
+    `customer_id`          varchar(50)    DEFAULT NULL,
     `admin_id`             varchar(50)    DEFAULT NULL,
     PRIMARY KEY (`id`),
-    CONSTRAINT `request_ibfk_1` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
+    CONSTRAINT `request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`)
+    CONSTRAINT `request_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
 );
 
 /*test data for the table `request` */
