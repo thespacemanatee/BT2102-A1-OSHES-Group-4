@@ -25,7 +25,8 @@ TABLE_HEADERS = [
     'Model',
     'Price ($)',
     'Warranty (months)',
-    'Stock'
+    'Stock',
+    'Sold'
 ]
 
 
@@ -58,7 +59,7 @@ def administrator_screen():
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_data = get_filtered_results(projection=PROJECTION)
+    table_data = get_filtered_results(admin=True, projection=PROJECTION)
     table_layout = search_table_component(table_data, TABLE_HEADERS)
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
@@ -111,7 +112,7 @@ def administrator_screen():
             factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
             power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
             production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-            res = get_filtered_results(category=category, model=model, projection=PROJECTION, color=color,
+            res = get_filtered_results(admin=True, category=category, model=model, projection=PROJECTION, color=color,
                                        factory=factory,
                                        power_supply=power_supply, production_year=production_year)
             window[SEARCH_TABLE].update(values=res)

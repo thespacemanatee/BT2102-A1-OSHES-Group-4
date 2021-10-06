@@ -25,7 +25,7 @@ def get_production_years():
     return list(Items.find().distinct('ProductionYear'))
 
 
-def get_filtered_results(category=None, model=None, projection=None,
+def get_filtered_results(admin=False, category=None, model=None, projection=None,
                          color=None, factory=None, power_supply=None, production_year=None):
     filter_by = {}
     if projection is None:
@@ -49,7 +49,9 @@ def get_filtered_results(category=None, model=None, projection=None,
             filter_criteria['ProductionYear'] = production_year
         filter_res = list(Items.find(filter_criteria))
         temp = list(product.values())
-        temp.append(len(filter_res))
-        final.append(temp[1:])
+        temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filter_res))))
+        if admin:
+            temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filter_res))))
+        final.append(temp[1:])  # excludes ObjectId
 
     return final
