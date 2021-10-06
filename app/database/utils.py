@@ -73,5 +73,11 @@ def get_filtered_results(admin=False, category=None, model=None,
     return final
 
 
+def find_product_by_category_and_model(category, model):
+    return Products.find_one({'Category': category, 'Model': model})
+
+
 def find_item_by_id(item_id):
-    return Items.find_one({'ItemID': item_id})
+    item = Items.find_one({'ItemID': item_id})
+    product = find_product_by_category_and_model(item['Category'], item['Model'])
+    return {**item, **product}

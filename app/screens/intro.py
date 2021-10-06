@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
 from app.screens.admin.admin_login import administrator_login_screen
 from app.screens.customer.cust_login import customer_login_screen
 from app.constants import ASCII_LOGO
@@ -9,20 +10,18 @@ INTRO_WINDOW_SIZE = (800, 700)
 
 
 def intro_screen():
-    layout_column = [[sg.Text(ASCII_LOGO)],
-                     [sg.Text("Welcome to OSHES.")],
-                     [sg.Text("Are you a customer or an administrator?")],
-                     [sg.Button('Customer', size=25), sg.Button(
-                         'Administrator', size=25)]
-                     ]
-    layout = [[sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],  # the thing that expands from top
-              [sg.Text('', pad=(0, 0), key='-EXPAND2-'),  # the thing that expands from left
-               sg.Column(layout_column, vertical_alignment='center', justification='center', k='-C-')]]
+    center_component = [sg.Column([[sg.Text(ASCII_LOGO)],
+                                   [sg.Text("Welcome to OSHES.")],
+                                   [sg.Text("Are you a customer or an administrator?")],
+                                   [sg.Button('Customer', size=25), sg.Button(
+                                       'Administrator', size=25)]
+                                   ])]
+    layout = centered_component(centered_children=center_component)
 
     window = setup_window('OSHES - Group 4', layout, size=INTRO_WINDOW_SIZE)
-    window['-C-'].expand(True, True, True)
-    window['-EXPAND-'].expand(True, True, True)
-    window['-EXPAND2-'].expand(True, False, True)
+    window[COLUMN].expand(True, True, True)
+    window[EXPAND_1].expand(True, True, True)
+    window[EXPAND_2].expand(True, False, True)
 
     while True:
         event, values = window.read()
