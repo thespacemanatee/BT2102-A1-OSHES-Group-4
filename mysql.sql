@@ -17,11 +17,11 @@ CREATE TABLE `customer` (
 PRIMARY KEY (`customerID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*data for the table `customer`*/
-insert into `customer`(`customerID`, `customerName`, `customerGender`, `email`, `address`, `customerPhone`, `customerPassword`) values
+/*test data for the table `customer`*/
+/*insert into `customer`(`customerID`, `customerName`, `customerGender`, `email`, `address`, `customerPhone`, `customerPassword`) values
 (1, 'Aly', 'F', 'aly@bt.com', 'sg', 1234567890, 'pass1'), 
 (2, 'Ben', 'M', 'ben@bt.com', 'sg', 1234567809, 'pass2'),
-(3, 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');
+(3, 'Carl', 'M', 'carl@bt.com', 'sg', 1234567980, 'pass3');*/
 
 
 
@@ -39,11 +39,11 @@ CREATE TABLE `administrator` (
 PRIMARY KEY (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*data for the table `administrator*/
-insert into `administrator`(`adminID`, `adminName`, `adminGender`, `adminPhone`, `adminPassword`) values
-('id4', 'Dina', 'F', 1234568790, 'pass4'),
-('id5', 'Ferb', 'M', 1234576890, 'pass5'),
-('id6', 'Greg', 'M', 1234657890, 'pass6');
+/*test data for the table `administrator*/
+/*insert into `administrator`(`adminID`, `adminName`, `adminGender`, `adminPhone`, `adminPassword`) values
+(4, 'Dina', 'F', 1234568790, 'pass4'),
+(5, 'Ferb', 'M', 1234576890, 'pass5'),
+(6, 'Greg', 'M', 1234657890, 'pass6');*/
 
 
 
@@ -58,12 +58,12 @@ CREATE TABLE `request` (
 `servicePaymentDate` date DEFAULT NULL,
 `requestStatus` varchar(50) DEFAULT '',
 `requestDate` date DEFAULT NULL,
-`adminID` varchar(15) DEFAULT NULL,
+`adminID` int DEFAULT NULL,
 PRIMARY KEY (`requestID`),
 CONSTRAINT `request_ibfk_1` FOREIGN KEY (`adminID`) REFERENCES `administrator` (`adminID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*data for the table `request` */
+/*test data for the table `request` */
 /*insert into `request` (`customerID`, `requestID`, `serviceAmount`, `servicePaymentDate`, `requestStatus`, `requestDate`, `adminID`) values
 ('id1', 001, 0.00, '13-01-21', 'submitted', '12-01-21', 'id6');*/
 
@@ -83,9 +83,9 @@ CREATE TABLE `product` (
 PRIMARY KEY (`productID`)
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*data for the table `product`*/
-insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values
-(1, 'light', 'safehome', 89.00, 120.00, 6);
+/*test data for the table `product`*/
+/*insert into `product`(`productID`, `category`, `model`, `cost`, `price`, `warranty`) values
+(1, 'light', 'safehome', 89.00, 120.00, 6);*/
 
 
 
@@ -103,8 +103,8 @@ CREATE TABLE `item` (
 `purchaseStatus` varchar(6) NOT NULL,
 `serviceStatus` varchar(50) DEFAULT '',
 `purchaseDate` date DEFAULT NULL,
-`customerID` varchar(15) DEFAULT NULL,
-`adminID` varchar(15) DEFAULT NULL,
+`customerID` int DEFAULT NULL,
+`adminID` int DEFAULT NULL,
 `productID` int NOT NULL,
 PRIMARY KEY (`itemID`),
 KEY `customerID` (`customerID`),
@@ -115,9 +115,9 @@ CONSTRAINT `item_ibfk_2` FOREIGN KEY (`adminID`) REFERENCES `administrator`(`adm
 CONSTRAINT `item_ibfk_3` FOREIGN KEY (`productID`) REFERENCES `product`(`productID`) 
 ) ENGINE=InnoDB DEFAULT CHARSET=latin1;
 
-/*data for the table `item`*/
-insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values
-('1001', 'black', 'battery', 'malaysia', 2014, 'sold', '', '23-01-21', 'id1', 'id4', 1);
+/*test data for the table `item`*/
+/*insert into `item`(`itemID`, `colour`, `powerSupply`, `factory`, `productionYear`, `purchaseStatus`, `serviceStatus`, `purchaseDate`, `customerID`, `adminID`, `productID`) values
+('1001', 'black', 'battery', 'malaysia', 2014, 'sold', '', '23-01-21', 'id1', 'id4', 1);*/
 
 
 
