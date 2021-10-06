@@ -81,7 +81,7 @@ def customer_screen():
                                 ])]
                   ]
 
-    window = setup_window(f"{CUSTOMER_NAME}'s session", tab_layout)
+    window = setup_window(f"{CUSTOMER_NAME}'s Session", tab_layout)
     window['-EXPAND-'].expand(True, True, True)
 
     while True:

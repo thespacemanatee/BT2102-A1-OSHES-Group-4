@@ -11,7 +11,6 @@ from app.components.power_supplies_component import power_supplies_filter_compon
 from app.components.production_years_filter_component import production_years_filter_component, \
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
-from app.constants import ADMIN_NAME
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_item_by_id
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
@@ -90,7 +89,7 @@ def administrator_screen(admin_id, name, gender, phone):
                                 ])]
                   ]
 
-    window = setup_window(f"{ADMIN_NAME}'s session", tab_layout)
+    window = setup_window(f"{name}'s Session", tab_layout)
     window['-EXPAND-'].expand(True, True, True)
 
     while True:
