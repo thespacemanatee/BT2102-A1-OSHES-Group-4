@@ -1,24 +1,22 @@
 import PySimpleGUI as sg
 
+from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
+from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
+from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
+from app.components.model_component import model_component, MODEL_RADIO
+from app.components.power_supplies_component import power_supplies_filter_component, POWER_SUPPLY_CHECKBOX_VAL, \
+    POWER_SUPPLY_CHECKBOX
+from app.components.production_years_filter_component import production_years_filter_component, \
+    PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
+from app.components.search_table_component import search_table_component
 from app.constants import ADMIN_NAME
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results
+from app.screens.customer.cust_dashboard import SEARCH_BUTTON
 from app.utils import setup_window, window_size
 
 RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
-CATEGORY_OPTION = 'category_option'
-SEARCH_BUTTON = 'search_button'
-MODEL_RADIO = 'model_radio'
-CATEGORY_RADIO = 'category_radio'
-COLOR_CHECKBOX = 'color_checkbox'
-FACTORY_CHECKBOX = 'factory_checkbox'
-POWER_SUPPLY_CHECKBOX = 'power_supply_checkbox'
-PRODUCTION_YEAR_CHECKBOX = 'production_year_checkbox'
-PRODUCTION_YEARS_CHECKBOX_VAL = 'production_years_checkbox_val'
-POWER_SUPPLY_CHECKBOX_VAL = 'power_supply_checkbox_val'
-FACTORY_CHECKBOX_VAL = 'factory_checkbox_val'
-COLOR_CHECKBOX_VAL = 'color_checkbox_val'
 
 table_headers = [
     'Category',
@@ -36,48 +34,31 @@ def administrator_screen():
 
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']
-    category_row = [sg.Radio('Category', CATEGORY_RADIO, default=True, enable_events=True, key=CATEGORY_RADIO, size=10),
-                    sg.OptionMenu(cat, default_value=cat[0], disabled=False, key=CATEGORY_OPTION,
-                                  size=10)]
+    category_row = category_component(cat)
 
     models = get_models()
     mod = models if len(models) > 0 else ['Null']
-    model_row = [sg.Radio('Model', MODEL_RADIO, default=False, enable_events=True, key=MODEL_RADIO, size=10),
-                 sg.OptionMenu(mod, default_value=mod[0], disabled=True, key=MODEL_OPTION, size=10)]
+    model_row = model_component(mod)
 
     colors = get_colors()
-    col = categories if len(categories) > 0 else ['Null']
-    colors_filter_row = sg.Column([[sg.Checkbox('Color', key=COLOR_CHECKBOX),
-                                    sg.OptionMenu(col, default_value=col[0], key=COLOR_CHECKBOX_VAL)]])
+    col = colors if len(colors) > 0 else ['Null']
+    colors_filter_row = colors_filter_component(col)
 
     factories = get_factories()
     fac = factories if len(factories) > 0 else ['Null']
-    factories_filter_row = sg.Column([[sg.Checkbox('Factory', key=FACTORY_CHECKBOX),
-                                       sg.OptionMenu(fac, default_value=fac[0], key=FACTORY_CHECKBOX_VAL)]])
+    factories_filter_row = factories_filter_component(fac)
 
     power_supplies = get_power_supplies()
     pow_sup = power_supplies if len(power_supplies) > 0 else ['Null']
-    power_supplies_filter_row = sg.Column([[sg.Checkbox('Power Supply', key=POWER_SUPPLY_CHECKBOX),
-                                            sg.OptionMenu(pow_sup, default_value=pow_sup[0],
-                                                          key=POWER_SUPPLY_CHECKBOX_VAL)]])
+    power_supplies_filter_row = power_supplies_filter_component(pow_sup)
 
     production_years = get_production_years()
     prod = production_years if len(production_years) > 0 else ['Null']
-    production_years_filter_row = sg.Column([[sg.Checkbox('Production Years', key=PRODUCTION_YEAR_CHECKBOX),
-                                              sg.OptionMenu(prod, default_value=prod[0],
-                                                            key=PRODUCTION_YEARS_CHECKBOX_VAL)]])
+    production_years_filter_row = production_years_filter_component(prod)
 
-    table_layout = [sg.Table(values=get_filtered_results(), headings=table_headers,
-                             auto_size_columns=False,
-                             display_row_numbers=True,
-                             justification='left',
-                             num_rows=20,
-                             alternating_row_color='lightyellow',
-                             key='-TABLE-',
-                             row_height=35,
-                             col_widths=[19, 19, 19, 19, 19],
-                             tooltip='Search Results',
-                             enable_events=True)]
+    table_data = get_filtered_results()
+    table_layout = search_table_component(table_data, table_headers)
+
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
                      category_row,
