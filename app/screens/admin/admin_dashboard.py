@@ -3,6 +3,7 @@ import PySimpleGUI as sg
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
+from app.components.item_search_component import item_search_component, ITEM_SEARCH_VAL, ITEM_SEARCH_RADIO
 from app.components.model_component import model_component, MODEL_RADIO
 from app.components.power_supplies_component import power_supplies_filter_component, POWER_SUPPLY_CHECKBOX_VAL, \
     POWER_SUPPLY_CHECKBOX
@@ -18,11 +19,11 @@ from app.utils import setup_window
 RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
 
-PROJECTION = ['Category', 'Model', 'Price ($)', 'Warranty (months)', 'Cost ($)']
 TABLE_HEADERS = [
+    'IID',
     'Category',
-    'Cost ($)',
     'Model',
+    'Cost ($)',
     'Price ($)',
     'Warranty (months)',
     'Stock',
@@ -59,12 +60,13 @@ def administrator_screen():
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_data = get_filtered_results(admin=True, projection=PROJECTION)
+    table_data = get_filtered_results(admin=True)
     table_layout = search_table_component(table_data, TABLE_HEADERS)
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
                      category_row,
                      model_row,
+                     item_search_component(),
                      [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
                      [colors_filter_row, factories_filter_row],
                      [power_supplies_filter_row, production_years_filter_row],
@@ -97,27 +99,48 @@ def administrator_screen():
 
         elif event == CATEGORY_RADIO:
             window[MODEL_RADIO].update(value=False)
+            window[ITEM_SEARCH_RADIO].update(value=False)
             window[MODEL_OPTION].update(disabled=True)
+            window[ITEM_SEARCH_VAL].update(disabled=True)
             window[CATEGORY_OPTION].update(disabled=False)
 
         elif event == MODEL_RADIO:
             window[CATEGORY_RADIO].update(value=False)
+            window[ITEM_SEARCH_RADIO].update(value=False)
             window[MODEL_OPTION].update(disabled=False)
+            window[ITEM_SEARCH_VAL].update(disabled=True)
+            window[CATEGORY_OPTION].update(disabled=True)
+
+        elif event == ITEM_SEARCH_RADIO:
+            window[MODEL_RADIO].update(value=False)
+            window[CATEGORY_RADIO].update(value=False)
+            window[MODEL_OPTION].update(disabled=True)
+            window[ITEM_SEARCH_VAL].update(disabled=False)
             window[CATEGORY_OPTION].update(disabled=True)
 
         elif event == SEARCH_BUTTON:
-            category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
-            model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
-            color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
-            factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
-            power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
-            production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-            res = get_filtered_results(admin=True, category=category, model=model, projection=PROJECTION, color=color,
-                                       factory=factory,
-                                       power_supply=power_supply, production_year=production_year)
-            window[SEARCH_TABLE].update(values=res)
+            if values[ITEM_SEARCH_RADIO] and values[ITEM_SEARCH_VAL]:
+                choice, _ = sg.Window('Continue?', [[sg.T('Do you want to continue?')], [sg.Ok(s=10)]],
+                                      keep_on_top=True).read(close=True)
+
+            elif values[ITEM_SEARCH_RADIO] and not values[ITEM_SEARCH_VAL]:
+                choice, _ = sg.Window('Error', [[sg.T('Please enter an Item Id')], [sg.Ok(s=10)]],
+                                      keep_on_top=True).read(close=True)
+
+            elif not values[ITEM_SEARCH_RADIO]:
+                category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
+                model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
+                color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
+                factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
+                power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
+                production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
+                res = get_filtered_results(admin=True, category=category, model=model,
+                                           color=color,
+                                           factory=factory,
+                                           power_supply=power_supply, production_year=production_year)
+                window[SEARCH_TABLE].update(values=res)
 
         elif event == RESET_BUTTON:
-            window[SEARCH_TABLE].update(values=get_filtered_results())
+            window[SEARCH_TABLE].update(values=get_filtered_results(admin=True))
 
     window.close()

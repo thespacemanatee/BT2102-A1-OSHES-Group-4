@@ -18,6 +18,7 @@ RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 
 TABLE_HEADERS = [
+    'IID',
     'Category',
     'Model',
     'Price ($)',

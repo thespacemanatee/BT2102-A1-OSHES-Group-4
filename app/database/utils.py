@@ -25,19 +25,35 @@ def get_production_years():
     return list(Items.find().distinct('ProductionYear'))
 
 
-def get_filtered_results(admin=False, category=None, model=None, projection=None,
+def get_filtered_results(admin=False, category=None, model=None,
                          color=None, factory=None, power_supply=None, production_year=None):
     filter_by = {}
-    if projection is None:
-        projection = ['Category', 'Model', 'Price ($)', 'Warranty (months)']
+    if admin:
+        projection = ['ProductID', 'Category', 'Model', 'Price ($)', 'Warranty (months)', 'Cost ($)']
+    else:
+        projection = ['ProductID', 'Category', 'Model', 'Price ($)', 'Warranty (months)']
     if category:
         filter_by['Category'] = category
     elif model:
         filter_by['Model'] = model
 
-    res = list(Products.find(filter_by, projection))
+    res = Products.find(filter_by, projection)
     final = []
-    for product in res:
+    for product in list(res):
+        product = {
+            'IID': product['ProductID'],
+            'Category': product['Category'],
+            'Model': product['Model'],
+            'Cost ($)': product['Cost ($)'],
+            'Price ($)': product['Price ($)'],
+            'Warranty (months)': product['Warranty (months)'],
+        } if admin else {
+            'IID': product['ProductID'],
+            'Category': product['Category'],
+            'Model': product['Model'],
+            'Price ($)': product['Price ($)'],
+            'Warranty (months)': product['Warranty (months)'],
+        }
         filter_criteria = {'Category': product['Category'], 'Model': product['Model']}
         if color:
             filter_criteria['Color'] = color
@@ -52,6 +68,6 @@ def get_filtered_results(admin=False, category=None, model=None, projection=None
         temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filter_res))))
         if admin:
             temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filter_res))))
-        final.append(temp[1:])  # excludes ObjectId
+        final.append(temp)
 
     return final
