@@ -13,10 +13,3 @@ mysql_client = mysql.connector.connect(
     user='root',
     password='password'
 )
-
-mycursor = mysql_client.cursor()
-
-mycursor.execute("SHOW DATABASES")
-
-for x in mycursor:
-    print(x)

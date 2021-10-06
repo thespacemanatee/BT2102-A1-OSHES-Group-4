@@ -1,4 +1,12 @@
-from app.database.setup import Products, Items
+from app.database.setup import mysql_client, Products, Items
+
+
+def initialise_mysql_database():
+    cursor = mysql_client.cursor()
+    with open('database/mysql_init.sql') as f:
+        results = cursor.execute(f.read(), multi=True)
+        for result in results:
+            continue
 
 
 def get_categories():
