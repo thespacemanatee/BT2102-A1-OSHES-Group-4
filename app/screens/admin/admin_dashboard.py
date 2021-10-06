@@ -34,7 +34,6 @@ TABLE_HEADERS = [
 
 def administrator_screen():
     main_layout = [[sg.Text(f'Welcome, {ADMIN_NAME}.', font=('Arial', 32))],
-                   [sg.Button('Initialise Database', size=25)],
                    [sg.Text(f'Payment  Pending', font=('Arial', 24))]]
 
     categories = get_categories()

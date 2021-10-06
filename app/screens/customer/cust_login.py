@@ -4,43 +4,45 @@ from app.screens.customer.cust_dashboard import customer_screen
 from app.utils import setup_window
 from app.constants import CUSTOMER_ID, PASSWORD
 
+ID_VAL = 'id_val'
+PASSWORD_VAL = 'password_val'
+WRONG_ENTRY = 'wrong_entry'
+
 
 def customer_login_screen(intro_window):
     # customer login window
-    layout_column = [[sg.Text('Customer ID:')],
-                     [sg.Input(key='id', size=53)],
-                     [sg.Text('Password:')],
-                     [sg.Input(key='pass', size=53)],
-                     [sg.Text(key='wrong_entry')],
-                     [sg.Button('Login', size=25),
-                      sg.Button('Cancel', size=25)]
-                     ]
+    layout = [
+        [sg.Column(
+            [[sg.Text('Customer ID:')],
+             [sg.Input(key=ID_VAL, size=53)],
+             [sg.Text('Password:')],
+             [sg.Input(key=PASSWORD_VAL, size=53)],
+             [sg.Text(key=WRONG_ENTRY)],
+             [sg.Button('Login', size=25),
+              sg.Button('Register', size=25)],
+             ],
+            pad=25
+        )]
+    ]
 
-    layout = [[sg.Text(key='-EXPAND-', font='ANY 1', pad=(0, 0))],  # the thing that expands from top
-              [sg.Text('', pad=(0, 0), key='-EXPAND2-'),  # the thing that expands from left
-               sg.Column(layout_column, vertical_alignment='center', justification='center', k='-C-')]]
-
-    window = setup_window('Customer Login', layout)
-    window['-C-'].expand(True, True, True)
-    window['-EXPAND-'].expand(True, True, True)
-    window['-EXPAND2-'].expand(True, False, True)
+    window = setup_window('Customer Login', layout, keep_on_top=True)
 
     while True:
         event, values = window.read()
-        if event == "Cancel":
+        if event == sg.WIN_CLOSED:
             break
 
-        elif event == sg.WIN_CLOSED:
-            intro_window.close()
-            break
+        elif event == "Register":
+            # TODO
+            pass
 
         # check customer ID and password against database
-        elif values['id'] == CUSTOMER_ID and values['pass'] == PASSWORD:
+        elif values[ID_VAL] == CUSTOMER_ID and values['pass'] == PASSWORD:
             window.close()
             intro_window.close()
             customer_screen()
         else:
-            window['wrong_entry'].update(
+            window[WRONG_ENTRY].update(
                 'You have entered the wrong ID or password.', text_color='red')
 
     window.close()
