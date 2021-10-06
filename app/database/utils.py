@@ -25,9 +25,11 @@ def get_production_years():
     return list(Items.find().distinct('ProductionYear'))
 
 
-def get_filtered_results(category=None, model=None, color=None, factory=None, power_supply=None, production_year=None):
+def get_filtered_results(category=None, model=None, projection=None,
+                         color=None, factory=None, power_supply=None, production_year=None):
     filter_by = {}
-    projection = ['Category', 'Model', 'Price ($)', 'Warranty (months)']
+    if projection is None:
+        projection = ['Category', 'Model', 'Price ($)', 'Warranty (months)']
     if category:
         filter_by['Category'] = category
     elif model:
@@ -36,9 +38,7 @@ def get_filtered_results(category=None, model=None, color=None, factory=None, po
     res = list(Products.find(filter_by, projection))
     final = []
     for product in res:
-        filter_criteria = {}
-        filter_criteria['Category'] = product['Category']
-        filter_criteria['Model'] = product['Model']
+        filter_criteria = {'Category': product['Category'], 'Model': product['Model']}
         if color:
             filter_criteria['Color'] = color
         if factory:

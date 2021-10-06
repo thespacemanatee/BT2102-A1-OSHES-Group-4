@@ -5,6 +5,8 @@ from app.screens.customer.cust_login import customer_login_screen
 from app.constants import ASCII_LOGO
 from app.utils import setup_window
 
+INTRO_WINDOW_SIZE = (800, 700)
+
 
 def intro_screen():
     layout_column = [[sg.Text(ASCII_LOGO)],
@@ -17,7 +19,7 @@ def intro_screen():
               [sg.Text('', pad=(0, 0), key='-EXPAND2-'),  # the thing that expands from left
                sg.Column(layout_column, vertical_alignment='center', justification='center', k='-C-')]]
 
-    window = setup_window('OSHES - Group 4', layout)
+    window = setup_window('OSHES - Group 4', layout, size=INTRO_WINDOW_SIZE)
     window['-C-'].expand(True, True, True)
     window['-EXPAND-'].expand(True, True, True)
     window['-EXPAND2-'].expand(True, False, True)

@@ -7,21 +7,21 @@ from app.components.power_supplies_component import power_supplies_filter_compon
     POWER_SUPPLY_CHECKBOX
 from app.components.production_years_filter_component import production_years_filter_component, \
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
-from app.components.search_table_component import search_table_component
+from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.constants import CUSTOMER_NAME
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results
-from app.utils import setup_window, window_size
+from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 
-table_headers = [
+TABLE_HEADERS = [
     'Category',
     'Model',
-    'Price',
-    'Warranty',
+    'Price ($)',
+    'Warranty (months)',
     'Stock'
 ]
 
@@ -54,15 +54,14 @@ def customer_screen():
     production_years_filter_row = production_years_filter_component(prod)
 
     table_data = get_filtered_results()
-    table_layout = search_table_component(table_data, table_headers)
-
+    table_layout = search_table_component(table_data, TABLE_HEADERS)
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
                      category_row,
                      model_row,
                      [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
-                     [colors_filter_row, factories_filter_row, power_supplies_filter_row,
-                      production_years_filter_row],
+                     [colors_filter_row, factories_filter_row],
+                     [power_supplies_filter_row, production_years_filter_row],
                      [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
                                   sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
                                 element_justification='center')],
@@ -78,8 +77,7 @@ def customer_screen():
                                 [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
                                 [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
                                 logout_layout,
-                                ], size=window_size
-                               )]
+                                ])]
                   ]
 
     window = setup_window(f"{CUSTOMER_NAME}'s session", tab_layout)
@@ -109,9 +107,9 @@ def customer_screen():
             production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
             res = get_filtered_results(category=category, model=model, color=color, factory=factory,
                                        power_supply=power_supply, production_year=production_year)
-            window['-TABLE-'].update(values=res)
+            window[SEARCH_TABLE].update(values=res)
 
         elif event == RESET_BUTTON:
-            window['-TABLE-'].update(values=get_filtered_results())
+            window[SEARCH_TABLE].update(values=get_filtered_results())
 
     window.close()
