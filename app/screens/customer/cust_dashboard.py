@@ -15,6 +15,8 @@ from app.database.utils import get_categories, get_models, get_colors, get_facto
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
+WRONG_ENTRY = 'wrong_entry'
+QUANTITY_VAL = 'quantity_val'
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 PURCHASE_TABLE = 'purchase_table'
@@ -27,14 +29,13 @@ SEARCH_TABLE_HEADERS = [
     'Warranty (months)',
     'Stock'
 ]
-PURCHASE_TABLE_HEADERS = ['IID', 'Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year']
+PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 
 
 def item_purchase_popup(purchase_window, product, item, update_search_table):
     user = get_current_user()
     layout = centered_component(top_children=[
         sg.Column([
-            [sg.Text('Item ID:')],
             [sg.Text('Category:')],
             [sg.Text('Model:')],
             [sg.Text('Color:')],
@@ -46,7 +47,6 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
         ],
             pad=20
         ), sg.Column([
-            [sg.Text(item["ItemID"])],
             [sg.Text(product["Category"])],
             [sg.Text(product["Model"])],
             [sg.Text(item["Color"])],
@@ -59,9 +59,15 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
             element_justification='right',
             pad=20
         )
-    ], centered_children=[sg.Button('Purchase', s=10), sg.Button('Cancel', s=10)])
+    ], centered_children=[sg.Column([[sg.Text('Quantity'), sg.Input(k=QUANTITY_VAL, s=10)],
+                                     [sg.Text(k=WRONG_ENTRY)],
+                                     [sg.Column([[
+                                         sg.Button('Purchase', s=10), sg.Button('Cancel', s=10)]
+                                     ])]
+                                     ]),
+                          ])
 
-    popup = setup_window(f'Item ID: {item["ItemID"]}', layout, keep_on_top=True)
+    popup = setup_window('Confirm Purchase', layout, keep_on_top=True)
     popup[COLUMN].expand(True, True, True)
     popup[EXPAND_1].expand(True, True, True)
     popup[EXPAND_2].expand(True, False, True)
@@ -72,11 +78,23 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
             break
 
         elif event == 'Purchase':
-            purchase_item(user.id, item["ItemID"])
-            update_search_table()
-            popup.close()
-            purchase_window.close()
-            break
+            quantity = int(values[QUANTITY_VAL])
+            if quantity > item['Stock']:
+                popup[WRONG_ENTRY].update('Quantity exceeded.', text_color='red')
+
+            else:
+                purchase_item(user.id, {
+                    'Category': item['Category'],
+                    'Model': item['Model'],
+                    'Color': item['Color'],
+                    'Factory': item['Factory'],
+                    'PowerSupply': item['PowerSupply'],
+                    'ProductionYear': item['ProductionYear'],
+                }, int(values[QUANTITY_VAL]))
+                update_search_table()
+                popup.close()
+                purchase_window.close()
+                break
 
     popup.close()
 
@@ -84,6 +102,7 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
 def item_purchase_window(item_list, update_search_table):
     product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
     table_data = [list(item.values()) for item in item_list]
+
     layout = centered_component(top_children=[[
         sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
                  auto_size_columns=True,

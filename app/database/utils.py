@@ -103,14 +103,28 @@ def validate_customer_login(username, password):
     return True, results[0], results[1], results[2], results[3], results[4], results[5]
 
 
-def purchase_item(customer_id, item_id):
+def purchase_item(customer_id, item, quantity: int):
+    item['PurchaseStatus'] = 'Unsold'
+    res = Items.find(item).limit(quantity)
+    item_ids = []
+    for db_item in res:
+        item_ids.append(db_item['ItemID'])
+
+    mysql_values = []
+    for item_id in item_ids:
+        mysql_values.append(('Sold', customer_id, item_id))
+
     cursor = mysql_client.cursor()
     cursor.execute('USE `db.OSHES`;')
-    cursor.execute('UPDATE item SET purchase_status = %s, purchase_date = CURDATE(), customer_id = %s WHERE id = %s',
-                   ('Sold', customer_id, item_id))
+    cursor.executemany(
+        'UPDATE item SET purchase_status = %s, purchase_date = CURDATE(), customer_id = %s WHERE id = %s', mysql_values)
 
-    Items.update({
-        'ItemID': item_id
+    mongo_ids = []
+    for item_id in item_ids:
+        mongo_ids.append({'ItemID': item_id})
+
+    Items.update_many({
+        '$or': mongo_ids
     }, {
         '$set': {
             'PurchaseStatus': 'Sold'
@@ -189,7 +203,6 @@ def get_filtered_results(admin=False, category=None, model=None,
         temp_items = []
         for item in unsold_items:
             item = {
-                'ItemID': item['ItemID'],
                 'Category': item['Category'],
                 'Model': item['Model'],
                 'Color': item['Color'],
@@ -198,6 +211,13 @@ def get_filtered_results(admin=False, category=None, model=None,
                 'ProductionYear': item['ProductionYear'],
             }
             temp_items.append(item)
+
+        temp_items = [i for n, i in enumerate(temp_items) if i not in temp_items[n + 1:]]
+        for item in temp_items:
+            temp_item = item.copy()
+            temp_item['PurchaseStatus'] = 'Unsold'
+            count = len(list(Items.find(temp_item)))
+            item['Stock'] = count
         final_items.append(temp_items)
         temp = list(product.values())
         temp.append(len(unsold_items))
