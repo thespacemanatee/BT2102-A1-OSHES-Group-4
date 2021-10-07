@@ -21,7 +21,7 @@ RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
 
 TABLE_HEADERS = [
-    'IID',
+    'Product ID',
     'Category',
     'Model',
     'Cost ($)',

@@ -20,7 +20,7 @@ SEARCH_BUTTON = 'search_button'
 PURCHASE_TABLE = 'purchase_table'
 
 SEARCH_TABLE_HEADERS = [
-    'IID',
+    'Product ID',
     'Category',
     'Model',
     'Price ($)',
@@ -84,7 +84,7 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
 def item_purchase_window(item_list, update_search_table):
     product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
     table_data = [list(item.values()) for item in item_list]
-    layout = [[
+    layout = centered_component(top_children=[[
         sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
                  auto_size_columns=True,
                  justification='right',
@@ -95,18 +95,20 @@ def item_purchase_window(item_list, update_search_table):
                  tooltip='Item List',
                  enable_events=True
                  )
-    ]]
+    ]], centered_children=[sg.Button('Cancel', size=10)])
 
     window = setup_window(f"Purchase Product: {product['Category']}, Model: {product['Model']}", layout)
 
     while True:
         event, values = window.read()
-        if event == sg.WIN_CLOSED:
+        if event in ('Cancel', sg.WIN_CLOSED):
             break
 
         if event == PURCHASE_TABLE:
             item = item_list[values[PURCHASE_TABLE][0]]
             item_purchase_popup(window, product, item, update_search_table)
+
+    window.close()
 
 
 def search_tab_screen(table_data):
