@@ -109,7 +109,8 @@ def get_filtered_results(admin=False, category=None, model=None,
         filter_by['Model'] = model
 
     res = Products.find(filter_by, projection)
-    final = []
+    final_items = []
+    final_values = []
     for product in list(res):
         product = {
             'IID': product['ProductID'],
@@ -134,14 +135,15 @@ def get_filtered_results(admin=False, category=None, model=None,
             filter_criteria['PowerSupply'] = power_supply
         if production_year:
             filter_criteria['ProductionYear'] = production_year
-        filter_res = list(Items.find(filter_criteria))
+        filtered_items = list(Items.find(filter_criteria))
+        final_items.append(filtered_items)
         temp = list(product.values())
-        temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filter_res))))
+        temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filtered_items))))
         if admin:
-            temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filter_res))))
-        final.append(temp)
+            temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filtered_items))))
+        final_values.append(temp)
 
-    return final
+    return final_values, final_items
 
 
 def find_product_by_category_and_model(category, model):

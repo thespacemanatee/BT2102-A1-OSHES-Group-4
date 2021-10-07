@@ -60,7 +60,7 @@ def administrator_screen(admin_id, name, gender, phone):
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_data = get_filtered_results(admin=True)
+    table_data, item_data = get_filtered_results(admin=True)
     table_layout = search_table_component(table_data, TABLE_HEADERS)
 
     search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
@@ -131,13 +131,14 @@ def administrator_screen(admin_id, name, gender, phone):
                 factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
                 power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
                 production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-                res = get_filtered_results(admin=True, category=category, model=model,
+                table_data, item_data = get_filtered_results(admin=True, category=category, model=model,
                                            color=color,
                                            factory=factory,
                                            power_supply=power_supply, production_year=production_year)
-                window[SEARCH_TABLE].update(values=res)
+                window[SEARCH_TABLE].update(values=table_data)
 
         elif event == RESET_BUTTON:
-            window[SEARCH_TABLE].update(values=get_filtered_results(admin=True))
+            table_data, item_data = get_filtered_results(admin=True)
+            window[SEARCH_TABLE].update(values=table_data)
 
     window.close()
