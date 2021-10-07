@@ -82,11 +82,11 @@ def administrator_screen():
 
     logout_layout = [[
         sg.Column([
-            [sg.Text(' ' * 80)],
-            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))],
+            [sg.Text(' ' * 480, font=('Arial', 1))],
+            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 24))],
         ], element_justification='left'),
         sg.Column([
-            [sg.Text(' ' * 80)],
+            [sg.Text(' ' * 480, font=('Arial', 1))],
             [sg.Button('Log Out')]
         ], element_justification='right'),
     ]]

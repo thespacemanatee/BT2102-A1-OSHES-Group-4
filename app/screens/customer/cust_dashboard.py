@@ -12,7 +12,8 @@ from app.components.production_years_filter_component import production_years_fi
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels
+    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
+    find_complete_item_information_by_id
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
@@ -21,6 +22,7 @@ QUANTITY_VAL = 'quantity_val'
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 PURCHASE_TABLE = 'purchase_table'
+HISTORY_TABLE = 'history_table'
 
 SEARCH_TABLE_HEADERS = [
     'Product ID',
@@ -31,6 +33,23 @@ SEARCH_TABLE_HEADERS = [
     'Stock'
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
+HISTORY_TABLE_HEADERS = ['Item ID', 'Category', 'Model', 'Purchase Date']
+
+
+def purchase_history_tab_screen():
+    user = get_current_user()
+    history = find_complete_item_information_by_id(user.id)
+    table_data = [[item['id'], item['category'], item['model'], item['purchase_date']] for item in history]
+    return [
+        [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
+                  justification='right',
+                  num_rows=18,
+                  alternating_row_color='lightyellow',
+                  key=HISTORY_TABLE,
+                  row_height=35,
+                  tooltip='Purchase History',
+                  enable_events=True)]
+    ]
 
 
 def item_purchase_popup(purchase_window, product, item, update_search_table, update_stock_levels):
@@ -201,15 +220,15 @@ def customer_screen():
 
     search_layout = search_tab_screen(table_data)
 
-    request_layout = [[sg.Text('request servicing for your purchased item here')]]
+    request_layout = purchase_history_tab_screen()
 
     logout_layout = [[
         sg.Column([
-            [sg.Text(' ' * 67)],
-            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))],
+            [sg.Text(' ' * 405, font=('Arial', 1))],
+            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 24))],
         ], element_justification='left'),
         sg.Column([
-            [sg.Text(' ' * 67)],
+            [sg.Text(' ' * 405, font=('Arial', 1))],
             [sg.Button('Log Out')]
         ], element_justification='right'),
     ]]
@@ -218,7 +237,7 @@ def customer_screen():
         logout_layout,
         sg.TabGroup([
             [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
-            [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
+            [sg.Tab('   Purchase History   ', [[sg.Column(request_layout, pad=25)]])],
         ])]
     ]
 

@@ -42,6 +42,7 @@ def initialise_mysql_database():
         temp)
 
     mysql_client.commit()
+    cursor.close()
 
 
 def is_admin_username_taken(username):
@@ -68,6 +69,7 @@ def insert_administrator(username, name, gender, phone, password):
     cursor.execute('INSERT INTO administrator (id, name, gender, phone, password) VALUES (%s,%s, %s, %s, %s)',
                    (username, name, gender, phone, password))
     mysql_client.commit()
+    cursor.close()
 
 
 def insert_customer(username, name, gender, email, address, phone, password):
@@ -77,6 +79,7 @@ def insert_customer(username, name, gender, email, address, phone, password):
         'INSERT INTO customer (id, name, gender, email, address, phone, password) VALUES (%s,%s, %s, %s, %s, %s, %s)',
         (username, name, gender, email, address, phone, password))
     mysql_client.commit()
+    cursor.close()
 
 
 def validate_administrator_login(username, password):
@@ -132,6 +135,7 @@ def purchase_item(customer_id, item, quantity: int):
     })
 
     mysql_client.commit()
+    cursor.close()
 
 
 def get_categories():
@@ -240,3 +244,25 @@ def find_item_by_id(item_id):
     item = Items.find_one({'ItemID': item_id})
     product = find_product_by_category_and_model(item['Category'], item['Model'])
     return {**item, **product}
+
+
+def find_product_by_id(product_id):
+    cursor = mysql_client.cursor(dictionary=True)
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('SELECT * FROM product WHERE id = %s', (product_id,))
+    return cursor.fetchone()
+
+
+def find_complete_item_information_by_id(customer_id):
+    cursor = mysql_client.cursor(dictionary=True)
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute(
+        'SELECT * FROM item WHERE customer_id = %s', (customer_id,))
+
+    def get_product(product_id):
+        res = find_product_by_id(product_id)
+        res['product_id'] = res['id']
+        del res['id']
+        return res
+
+    return [{**item, **get_product(item['product_id'])} for item in cursor.fetchall()]
