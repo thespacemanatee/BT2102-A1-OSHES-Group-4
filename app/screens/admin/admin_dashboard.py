@@ -87,7 +87,7 @@ def administrator_screen():
     logout_layout = [
         sg.Column([[sg.Text('', pad=(0, 0), key='-EXPAND-'), sg.Button('Log Out')]], justification='right')]
 
-    tab_layout = [[sg.TabGroup([[sg.Tab('        Home        ', [[sg.Column(main_layout, pad=25)]])],
+    tab_layout = [[sg.TabGroup([[sg.Tab('         Home         ', [[sg.Column(main_layout, pad=25)]])],
                                 [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
                                 [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
                                 logout_layout

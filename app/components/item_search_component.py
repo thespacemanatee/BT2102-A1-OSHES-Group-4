@@ -5,5 +5,5 @@ ITEM_SEARCH_RADIO = 'item_radio'
 
 
 def item_search_component():
-    return [sg.Radio('Item Id', ITEM_SEARCH_RADIO, default=False, enable_events=True, key=ITEM_SEARCH_RADIO, size=10),
+    return [sg.Radio('Item ID', ITEM_SEARCH_RADIO, default=False, enable_events=True, key=ITEM_SEARCH_RADIO, size=10),
             sg.Input(key=ITEM_SEARCH_VAL, size=13, disabled=True)]

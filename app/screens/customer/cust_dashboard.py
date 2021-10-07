@@ -121,20 +121,21 @@ def item_purchase_window(item_list, update_search_table):
         item_list_copy, table_data = setup_purchase_table(item_list)
         window[PURCHASE_TABLE].update(values=table_data)
 
-    layout = centered_component(top_children=[[
-        sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
-                 auto_size_columns=True,
-                 justification='right',
-                 num_rows=10,
-                 alternating_row_color='lightyellow',
-                 key=PURCHASE_TABLE,
-                 row_height=35,
-                 tooltip='Item List',
-                 enable_events=True
-                 )
-    ]], centered_children=[sg.Button('Done', size=10)])
+    layout = centered_component(
+        top_children=[[sg.Text(f"Product: {product['Category']}; Model: {product['Model']}")], [
+            sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
+                     justification='right',
+                     num_rows=10,
+                     alternating_row_color='lightyellow',
+                     key=PURCHASE_TABLE,
+                     row_height=35,
+                     tooltip='Item List',
+                     enable_events=True,
+                     pad=(10, 20)
+                     )
+        ]], centered_children=[sg.Button('Done', size=10)])
 
-    window = setup_window(f"Purchase Product: {product['Category']}, Model: {product['Model']}", layout)
+    window = setup_window('Purchase an Item', layout)
 
     while True:
         event, values = window.read()
@@ -209,7 +210,7 @@ def customer_screen():
     logout_layout = [
         sg.Column([[sg.Text('', pad=(0, 0), key='-EXPAND-'), sg.Button('Log Out')]], justification='right')]
 
-    tab_layout = [[sg.TabGroup([[sg.Tab('        Home        ', [[sg.Column(main_layout, pad=25)]])],
+    tab_layout = [[sg.TabGroup([[sg.Tab('         Home         ', [[sg.Column(main_layout, pad=25)]])],
                                 [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
                                 [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
                                 logout_layout,
@@ -250,10 +251,11 @@ def customer_screen():
             window[SEARCH_TABLE].update(values=table_data)
 
         elif event == SEARCH_TABLE:
-            item_list = item_data[values[SEARCH_TABLE][0]]
+            index = values[SEARCH_TABLE][0]
+            item_list = item_data[index]
             if len(item_list) > 0:
                 item_purchase_window(item_list, update_search_table)
             else:
-                sg.popup('No Stock')
+                sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
 
     window.close()
