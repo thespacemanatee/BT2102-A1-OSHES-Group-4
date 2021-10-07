@@ -61,8 +61,8 @@ def customer_register_screen(intro_window):
                     address = values[ADDRESS_VAL]
                     phone = int(values[PHONE_NUMBER_VAL])
                     password = values[PASSWORD_VAL]
-                    cust_id = insert_customer(username, name, gender, email, address, phone, password)
-                    set_current_user(Customer(cust_id, name, gender, email, address, phone))
+                    insert_customer(username, name, gender, email, address, phone, password)
+                    set_current_user(Customer(username, name, gender, email, address, phone))
                     window.close()
                     intro_window.close()
                     customer_screen()

@@ -53,8 +53,8 @@ def administrator_register_screen(intro_window):
                     gender = values[GENDER_VAL]
                     phone = int(values[PHONE_NUMBER_VAL])
                     password = values[PASSWORD_VAL]
-                    admin_id = insert_administrator(username, name, gender, phone, password)
-                    set_current_user(Admin(admin_id, name, gender, phone))
+                    insert_administrator(username, name, gender, phone, password)
+                    set_current_user(Admin(username, name, gender, phone))
                     window.close()
                     intro_window.close()
                     administrator_screen()

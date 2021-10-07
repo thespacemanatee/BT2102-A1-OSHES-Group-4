@@ -11,7 +11,7 @@ def initialise_mysql_database():
     Items.remove({})
     with open('data/items.json') as items:
         Items.insert_many(json.load(items))
-        
+
     cursor = mysql_client.cursor()
     with open('data/mysql_init.sql') as f:
         results = cursor.execute(f.read(), multi=True)
@@ -69,8 +69,6 @@ def insert_administrator(username, name, gender, phone, password):
                    (username, name, gender, phone, password))
     mysql_client.commit()
 
-    return cursor.lastrowid
-
 
 def insert_customer(username, name, gender, email, address, phone, password):
     cursor = mysql_client.cursor()
@@ -79,8 +77,6 @@ def insert_customer(username, name, gender, email, address, phone, password):
         'INSERT INTO customer (id, name, gender, email, address, phone, password) VALUES (%s,%s, %s, %s, %s, %s, %s)',
         (username, name, gender, email, address, phone, password))
     mysql_client.commit()
-
-    return cursor.lastrowid
 
 
 def validate_administrator_login(username, password):

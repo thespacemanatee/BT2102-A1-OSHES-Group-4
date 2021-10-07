@@ -41,12 +41,12 @@ def customer_login_screen(intro_window):
 
         # check customer ID and password against database
         elif event == 'Login':
-            valid, admin_id, name, gender, email, address, phone = validate_customer_login(values[ID_VAL],
+            valid, cust_id, name, gender, email, address, phone = validate_customer_login(values[ID_VAL],
                                                                                            values[PASSWORD_VAL])
             if valid:
                 intro_window.close()
                 window.close()
-                set_current_user(Customer(admin_id, name, gender, email, address, phone))
+                set_current_user(Customer(cust_id, name, gender, email, address, phone))
                 customer_screen()
                 break
             else:
