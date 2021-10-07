@@ -66,9 +66,8 @@ def search_tab_screen(table_data):
             [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
             [colors_filter_row, factories_filter_row],
             [power_supplies_filter_row, production_years_filter_row],
-            [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
-                         sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
-                       element_justification='center')],
+            [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
+             sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
             table_layout
             ]
 
@@ -76,26 +75,31 @@ def search_tab_screen(table_data):
 def administrator_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
-    main_layout = [[sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))],
-                   [sg.Text(f'Payment Pending', font=('Arial', 24))]]
 
     search_layout = search_tab_screen(table_data)
 
-    request_layout = [
-        [sg.Text('request servicing for your purchased item here')]]
+    request_layout = [[sg.Text('request servicing for your purchased item here')]]
 
-    logout_layout = [
-        sg.Column([[sg.Text('', pad=(0, 0), key='-EXPAND-'), sg.Button('Log Out')]], justification='right')]
+    logout_layout = [[
+        sg.Column([
+            [sg.Text(' ' * 80)],
+            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))],
+        ], element_justification='left'),
+        sg.Column([
+            [sg.Text(' ' * 80)],
+            [sg.Button('Log Out')]
+        ], element_justification='right'),
+    ]]
 
-    tab_layout = [[sg.TabGroup([[sg.Tab('         Home         ', [[sg.Column(main_layout, pad=25)]])],
-                                [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
-                                [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
-                                logout_layout
-                                ])]
-                  ]
+    tab_layout = [[
+        logout_layout,
+        sg.TabGroup([
+            [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
+            [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
+        ])]
+    ]
 
     window = setup_window(f"{user.name}'s Session", tab_layout)
-    window['-EXPAND-'].expand(True, True, True)
 
     while True:
         event, values = window.read()
