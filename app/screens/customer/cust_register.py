@@ -1,7 +1,7 @@
 import PySimpleGUI as sg
 
-from app.database.utils import insert_administrator, is_admin_username_taken
-from app.screens.admin.admin_dashboard import administrator_screen
+from app.database.utils import is_cust_username_taken, insert_customer
+from app.screens.customer.cust_dashboard import customer_screen
 from app.utils import setup_window
 
 GENDERS = ['Male', 'Female', 'Others']
@@ -9,12 +9,14 @@ GENDERS = ['Male', 'Female', 'Others']
 USERNAME_VAL = 'username_val'
 NAME_VAL = 'name_val'
 GENDER_VAL = 'gender_val'
+EMAIL_ADDRESS_VAL = 'email_address_val'
 PHONE_NUMBER_VAL = 'phone_number_val'
+ADDRESS_VAL = 'address_val'
 PASSWORD_VAL = 'password_val'
 WRONG_ENTRY = 'wrong_entry'
 
 
-def administrator_register_screen(intro_window):
+def customer_register_screen(intro_window):
     layout = [[sg.Column([
         [sg.Text('Username:')],
         [sg.Input(key=USERNAME_VAL, size=53)],
@@ -22,6 +24,10 @@ def administrator_register_screen(intro_window):
         [sg.Input(key=NAME_VAL, size=53)],
         [sg.Text('Gender:')],
         [sg.OptionMenu(values=GENDERS, key=GENDER_VAL, size=10)],
+        [sg.Text('Email Address:')],
+        [sg.Input(key=EMAIL_ADDRESS_VAL, size=53)],
+        [sg.Text('Address:')],
+        [sg.Input(key=ADDRESS_VAL, size=53)],
         [sg.Text('Phone Number:')],
         [sg.Input(key=PHONE_NUMBER_VAL, size=53)],
         [sg.Text('Password:')],
@@ -42,20 +48,22 @@ def administrator_register_screen(intro_window):
             break
 
         elif event == 'Register' and values[USERNAME_VAL] and values[NAME_VAL] and values[GENDER_VAL] and \
-                values[PHONE_NUMBER_VAL] and values[PASSWORD_VAL]:
+                values[EMAIL_ADDRESS_VAL] and values[PHONE_NUMBER_VAL] and values[ADDRESS_VAL] and values[PASSWORD_VAL]:
             try:
                 if values[PHONE_NUMBER_VAL]:
                     username = values[USERNAME_VAL]
-                    if is_admin_username_taken(username):
+                    if is_cust_username_taken(username):
                         raise ValueError('Username taken')
                     name = values[NAME_VAL]
                     gender = values[GENDER_VAL]
+                    email = values[EMAIL_ADDRESS_VAL]
+                    address = values[ADDRESS_VAL]
                     phone = int(values[PHONE_NUMBER_VAL])
                     password = values[PASSWORD_VAL]
-                    admin_id = insert_administrator(username, name, gender, phone, password)
+                    admin_id = insert_customer(username, name, gender, email, address, phone, password)
                     window.close()
                     intro_window.close()
-                    administrator_screen(admin_id, name, gender, phone)
+                    customer_screen(admin_id, name, gender, email, address, phone)
                 break
             except ValueError as e:
                 if str(e) == 'Username taken':

@@ -27,7 +27,8 @@ TABLE_HEADERS = [
 ]
 
 
-def customer_screen():
+def customer_screen(admin_id, name, gender, email, address, phone):
+    print(admin_id, name, gender, email, address, phone)
     main_layout = [[sg.Text(f'Welcome, {CUSTOMER_NAME}.', font=('Arial', 32))]]
 
     categories = get_categories()

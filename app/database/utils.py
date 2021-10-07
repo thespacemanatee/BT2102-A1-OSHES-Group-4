@@ -18,7 +18,7 @@ def is_admin_username_taken(username):
     return True if cursor.rowcount > 0 else False
 
 
-def is_customer_username_taken(username):
+def is_cust_username_taken(username):
     cursor = mysql_client.cursor()
     cursor.execute('USE `db.OSHES`;')
     cursor.execute('SELECT id FROM customer WHERE id = %s', (username,))
@@ -58,6 +58,18 @@ def validate_administrator_login(username, password):
         return False, "", "", "", ""
 
     return True, results[0], results[1], results[2], results[3]
+
+
+def validate_customer_login(username, password):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('SELECT * FROM customer WHERE id = %s AND password = %s', (username, password))
+    results = cursor.fetchone()
+
+    if results is None:
+        return False, "", "", "", "", "", ""
+
+    return True, results[0], results[1], results[2], results[3], results[4], results[5]
 
 
 def get_categories():

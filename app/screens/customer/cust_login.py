@@ -1,6 +1,8 @@
 import PySimpleGUI as sg
 
+from app.database.utils import validate_customer_login
 from app.screens.customer.cust_dashboard import customer_screen
+from app.screens.customer.cust_register import customer_register_screen
 from app.utils import setup_window
 from app.constants import CUSTOMER_ID, PASSWORD
 
@@ -33,16 +35,21 @@ def customer_login_screen(intro_window):
             break
 
         elif event == "Register":
-            # TODO
-            pass
+            window.close()
+            customer_register_screen(intro_window)
+            break
 
         # check customer ID and password against database
-        elif values[ID_VAL] == CUSTOMER_ID and values['pass'] == PASSWORD:
-            window.close()
-            intro_window.close()
-            customer_screen()
-        else:
-            window[WRONG_ENTRY].update(
-                'You have entered the wrong ID or password.', text_color='red')
+        elif event == 'Login':
+            valid, admin_id, name, gender, email, address, phone = validate_customer_login(values[ID_VAL],
+                                                                                           values[PASSWORD_VAL])
+            if valid:
+                intro_window.close()
+                window.close()
+                customer_screen(admin_id, name, gender, email, address, phone)
+                break
+            else:
+                window[WRONG_ENTRY].update(
+                    'You have entered the wrong ID or password.', text_color='red')
 
     window.close()
