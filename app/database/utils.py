@@ -8,6 +8,31 @@ def initialise_mysql_database():
         for result in results:
             continue
 
+    products = Products.find({}, {'_id': False})
+    temp = []
+    for product in products:
+        temp.append(
+            (product['ProductID'], product['Category'], product['Model'], product['Cost ($)'], product['Price ($)'],
+             product['Warranty (months)']))
+    cursor.executemany(
+        'INSERT INTO product (id, category, model, cost, price, warranty) VALUES (%s, %s, %s, %s, %s, %s)', temp)
+
+    mysql_client.commit()
+
+    items = Items.find({}, {'_id': False})
+    temp = []
+    for item in items:
+        product = find_product_by_category_and_model(item['Category'], item['Model'])
+        temp.append(
+            (item['ItemID'], item['Color'], item['PowerSupply'], item['Factory'], item['ProductionYear'],
+             item['PurchaseStatus'], item['ServiceStatus'], product['ProductID']))
+    cursor.executemany(
+        'INSERT INTO item (id, colour, power_supply, factory, production_year, purchase_status, service_status,'
+        ' product_id) VALUES (%s, %s, %s, %s, %s, %s, %s, %s)',
+        temp)
+
+    mysql_client.commit()
+
 
 def is_admin_username_taken(username):
     cursor = mysql_client.cursor()
@@ -136,11 +161,25 @@ def get_filtered_results(admin=False, category=None, model=None,
         if production_year:
             filter_criteria['ProductionYear'] = production_year
         filtered_items = list(Items.find(filter_criteria))
-        final_items.append(filtered_items)
+        unsold_items = list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filtered_items))
+        sold_items = list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filtered_items))
+        temp_items = []
+        for item in unsold_items:
+            item = {
+                'IID': item['ItemID'],
+                'Category': item['Category'],
+                'Model': item['Model'],
+                'Color': item['Color'],
+                'Factory': item['Factory'],
+                'Power Supply': item['PowerSupply'],
+                'Production Year': item['ProductionYear'],
+            }
+            temp_items.append(list(item.values()))
+        final_items.append(temp_items)
         temp = list(product.values())
-        temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Unsold', filtered_items))))
+        temp.append(len(unsold_items))
         if admin:
-            temp.append(len(list(filter(lambda x: x['PurchaseStatus'] == 'Sold', filtered_items))))
+            temp.append(len(sold_items))
         final_values.append(temp)
 
     return final_values, final_items
