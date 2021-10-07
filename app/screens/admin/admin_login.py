@@ -4,7 +4,6 @@ from app.database.utils import initialise_mysql_database, validate_administrator
 from app.screens.admin.admin_dashboard import administrator_screen
 from app.screens.admin.admin_register import administrator_register_screen
 from app.utils import setup_window
-from app.constants import ADMINISTRATOR_ID, PASSWORD
 
 ID_VAL = 'id_val'
 PASSWORD_VAL = 'password_val'

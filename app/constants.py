@@ -1,8 +1,3 @@
-# TEST CASE before database is linked
-CUSTOMER_ID = 'id'
-ADMINISTRATOR_ID = 'id'
-PASSWORD = 'pass'
-CUSTOMER_NAME = 'Customer Name'
 ASCII_LOGO = '''
 ░█████╗░░██████╗██╗░░██╗███████╗░██████╗
 ██╔══██╗██╔════╝██║░░██║██╔════╝██╔════╝

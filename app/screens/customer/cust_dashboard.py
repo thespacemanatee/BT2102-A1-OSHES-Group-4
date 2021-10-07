@@ -8,7 +8,6 @@ from app.components.power_supplies_component import power_supplies_filter_compon
 from app.components.production_years_filter_component import production_years_filter_component, \
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
-from app.constants import CUSTOMER_NAME
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results
 from app.utils import setup_window
@@ -29,7 +28,7 @@ TABLE_HEADERS = [
 
 def customer_screen(admin_id, name, gender, email, address, phone):
     print(admin_id, name, gender, email, address, phone)
-    main_layout = [[sg.Text(f'Welcome, {CUSTOMER_NAME}.', font=('Arial', 32))]]
+    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))]]
 
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']
@@ -82,7 +81,7 @@ def customer_screen(admin_id, name, gender, email, address, phone):
                                 ])]
                   ]
 
-    window = setup_window(f"{CUSTOMER_NAME}'s Session", tab_layout)
+    window = setup_window(f"{name}'s Session", tab_layout)
     window['-EXPAND-'].expand(True, True, True)
 
     while True:

@@ -4,7 +4,6 @@ from app.database.utils import validate_customer_login
 from app.screens.customer.cust_dashboard import customer_screen
 from app.screens.customer.cust_register import customer_register_screen
 from app.utils import setup_window
-from app.constants import CUSTOMER_ID, PASSWORD
 
 ID_VAL = 'id_val'
 PASSWORD_VAL = 'password_val'
