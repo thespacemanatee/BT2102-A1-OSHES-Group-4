@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.auth import get_current_user
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
@@ -72,10 +73,10 @@ def search_tab_screen(table_data):
             ]
 
 
-def administrator_screen(admin_id, name, gender, phone):
-    print(admin_id, name, gender, phone)
+def administrator_screen():
+    user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
-    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))],
+    main_layout = [[sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))],
                    [sg.Text(f'Payment Pending', font=('Arial', 24))]]
 
     search_layout = search_tab_screen(table_data)
@@ -93,7 +94,7 @@ def administrator_screen(admin_id, name, gender, phone):
                                 ])]
                   ]
 
-    window = setup_window(f"{name}'s Session", tab_layout)
+    window = setup_window(f"{user.name}'s Session", tab_layout)
     window['-EXPAND-'].expand(True, True, True)
 
     while True:

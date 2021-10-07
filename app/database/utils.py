@@ -97,6 +97,23 @@ def validate_customer_login(username, password):
     return True, results[0], results[1], results[2], results[3], results[4], results[5]
 
 
+def purchase_item(customer_id, item_id):
+    cursor = mysql_client.cursor()
+    cursor.execute('USE `db.OSHES`;')
+    cursor.execute('UPDATE item SET purchase_status = %s, purchase_date = CURDATE(), customer_id = %s WHERE id = %s',
+                   ('Sold', customer_id, item_id))
+
+    Items.update({
+        'ItemID': item_id
+    }, {
+        '$set': {
+            'PurchaseStatus': 'Sold'
+        }
+    })
+
+    mysql_client.commit()
+
+
 def get_categories():
     return list(Products.find().distinct('Category'))
 
@@ -138,14 +155,14 @@ def get_filtered_results(admin=False, category=None, model=None,
     final_values = []
     for product in list(res):
         product = {
-            'IID': product['ProductID'],
+            'ProductID': product['ProductID'],
             'Category': product['Category'],
             'Model': product['Model'],
             'Cost ($)': product['Cost ($)'],
             'Price ($)': product['Price ($)'],
             'Warranty (months)': product['Warranty (months)'],
         } if admin else {
-            'IID': product['ProductID'],
+            'ProductID': product['ProductID'],
             'Category': product['Category'],
             'Model': product['Model'],
             'Price ($)': product['Price ($)'],
@@ -166,15 +183,15 @@ def get_filtered_results(admin=False, category=None, model=None,
         temp_items = []
         for item in unsold_items:
             item = {
-                'IID': item['ItemID'],
+                'ItemID': item['ItemID'],
                 'Category': item['Category'],
                 'Model': item['Model'],
                 'Color': item['Color'],
                 'Factory': item['Factory'],
-                'Power Supply': item['PowerSupply'],
-                'Production Year': item['ProductionYear'],
+                'PowerSupply': item['PowerSupply'],
+                'ProductionYear': item['ProductionYear'],
             }
-            temp_items.append(list(item.values()))
+            temp_items.append(item)
         final_items.append(temp_items)
         temp = list(product.values())
         temp.append(len(unsold_items))

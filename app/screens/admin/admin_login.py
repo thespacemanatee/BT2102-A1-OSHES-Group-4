@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.auth import set_current_user, Admin
 from app.database.utils import initialise_mysql_database, validate_administrator_login
 from app.screens.admin.admin_dashboard import administrator_screen
 from app.screens.admin.admin_register import administrator_register_screen
@@ -43,7 +44,8 @@ def administrator_login_screen(intro_window):
             if valid:
                 intro_window.close()
                 window.close()
-                administrator_screen(admin_id, name, gender, phone)
+                set_current_user(Admin(admin_id, name, gender, phone))
+                administrator_screen()
                 break
             else:
                 window[WRONG_ENTRY].update(

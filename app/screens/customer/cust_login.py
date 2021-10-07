@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.auth import set_current_user, Customer
 from app.database.utils import validate_customer_login
 from app.screens.customer.cust_dashboard import customer_screen
 from app.screens.customer.cust_register import customer_register_screen
@@ -45,7 +46,8 @@ def customer_login_screen(intro_window):
             if valid:
                 intro_window.close()
                 window.close()
-                customer_screen(admin_id, name, gender, email, address, phone)
+                set_current_user(Customer(admin_id, name, gender, email, address, phone))
+                customer_screen()
                 break
             else:
                 window[WRONG_ENTRY].update(

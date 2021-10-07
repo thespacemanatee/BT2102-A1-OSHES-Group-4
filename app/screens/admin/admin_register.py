@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.auth import set_current_user, Admin
 from app.database.utils import insert_administrator, is_admin_username_taken
 from app.screens.admin.admin_dashboard import administrator_screen
 from app.utils import setup_window
@@ -53,9 +54,10 @@ def administrator_register_screen(intro_window):
                     phone = int(values[PHONE_NUMBER_VAL])
                     password = values[PASSWORD_VAL]
                     admin_id = insert_administrator(username, name, gender, phone, password)
+                    set_current_user(Admin(admin_id, name, gender, phone))
                     window.close()
                     intro_window.close()
-                    administrator_screen(admin_id, name, gender, phone)
+                    administrator_screen()
                 break
             except ValueError as e:
                 if str(e) == 'Username taken':

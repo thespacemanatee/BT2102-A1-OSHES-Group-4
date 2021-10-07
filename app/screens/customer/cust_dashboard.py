@@ -1,5 +1,7 @@
 import PySimpleGUI as sg
 
+from app.auth import get_current_user
+from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
 from app.components.model_component import model_component, MODEL_RADIO, MODEL_OPTION
@@ -9,12 +11,13 @@ from app.components.production_years_filter_component import production_years_fi
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results
+    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
+PURCHASE_TABLE = 'purchase_table'
 
 SEARCH_TABLE_HEADERS = [
     'IID',
@@ -27,26 +30,83 @@ SEARCH_TABLE_HEADERS = [
 PURCHASE_TABLE_HEADERS = ['IID', 'Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year']
 
 
-def item_purchase_window(item_list):
+def item_purchase_popup(purchase_window, product, item, update_search_table):
+    user = get_current_user()
+    layout = centered_component(top_children=[
+        sg.Column([
+            [sg.Text('Item ID:')],
+            [sg.Text('Category:')],
+            [sg.Text('Model:')],
+            [sg.Text('Color:')],
+            [sg.Text('Factory:')],
+            [sg.Text('Power Supply:')],
+            [sg.Text('Production Year:')],
+            [sg.Text('Price ($):')],
+            [sg.Text('Warranty (months)')],
+        ],
+            pad=20
+        ), sg.Column([
+            [sg.Text(item["ItemID"])],
+            [sg.Text(product["Category"])],
+            [sg.Text(product["Model"])],
+            [sg.Text(item["Color"])],
+            [sg.Text(item["Factory"])],
+            [sg.Text(item["PowerSupply"])],
+            [sg.Text(item["ProductionYear"])],
+            [sg.Text(product["Price ($)"])],
+            [sg.Text(product["Warranty (months)"])],
+        ],
+            element_justification='right',
+            pad=20
+        )
+    ], centered_children=[sg.Button('Purchase', s=10), sg.Button('Cancel', s=10)])
+
+    popup = setup_window(f'Item ID: {item["ItemID"]}', layout, keep_on_top=True)
+    popup[COLUMN].expand(True, True, True)
+    popup[EXPAND_1].expand(True, True, True)
+    popup[EXPAND_2].expand(True, False, True)
+
+    while True:
+        event, values = popup.read()
+        if event in ('Cancel', sg.WIN_CLOSED):
+            break
+
+        elif event == 'Purchase':
+            purchase_item(user.id, item["ItemID"])
+            update_search_table()
+            popup.close()
+            purchase_window.close()
+            break
+
+    popup.close()
+
+
+def item_purchase_window(item_list, update_search_table):
+    product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
+    table_data = [list(item.values()) for item in item_list]
     layout = [[
-        sg.Table(values=item_list, headings=PURCHASE_TABLE_HEADERS,
+        sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
                  auto_size_columns=True,
                  justification='right',
-                 num_rows=20,
+                 num_rows=10,
                  alternating_row_color='lightyellow',
-                 key=SEARCH_TABLE,
+                 key=PURCHASE_TABLE,
                  row_height=35,
-                 tooltip='Search Results',
+                 tooltip='Item List',
                  enable_events=True
                  )
     ]]
 
-    window = setup_window("Purchase", layout)
+    window = setup_window(f"Purchase Product: {product['Category']}, Model: {product['Model']}", layout)
 
     while True:
         event, values = window.read()
         if event == sg.WIN_CLOSED:
             break
+
+        if event == PURCHASE_TABLE:
+            item = item_list[values[PURCHASE_TABLE][0]]
+            item_purchase_popup(window, product, item, update_search_table)
 
 
 def search_tab_screen(table_data):
@@ -89,10 +149,16 @@ def search_tab_screen(table_data):
             ]
 
 
-def customer_screen(admin_id, name, gender, email, address, phone):
-    print(admin_id, name, gender, email, address, phone)
+def customer_screen():
+    user = get_current_user()
     table_data, item_data = get_filtered_results()
-    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))]]
+
+    def update_search_table():
+        nonlocal table_data, item_data
+        table_data, item_data = get_filtered_results()
+        window[SEARCH_TABLE].update(values=table_data)
+
+    main_layout = [[sg.Text(f'Welcome, {user.name}.', font=('Arial', 32))]]
 
     search_layout = search_tab_screen(table_data)
 
@@ -108,7 +174,7 @@ def customer_screen(admin_id, name, gender, email, address, phone):
                                 ])]
                   ]
 
-    window = setup_window(f"{name}'s Session", tab_layout)
+    window = setup_window(f"{user.name}'s Session", tab_layout)
     window['-EXPAND-'].expand(True, True, True)
 
     while True:
@@ -143,7 +209,6 @@ def customer_screen(admin_id, name, gender, email, address, phone):
 
         elif event == SEARCH_TABLE:
             item_list = item_data[values[SEARCH_TABLE][0]]
-            print(item_data)
-            item_purchase_window(item_list)
+            item_purchase_window(item_list, update_search_table)
 
     window.close()

@@ -1,5 +1,6 @@
 import PySimpleGUI as sg
 
+from app.auth import set_current_user, Customer
 from app.database.utils import is_cust_username_taken, insert_customer
 from app.screens.customer.cust_dashboard import customer_screen
 from app.utils import setup_window
@@ -60,10 +61,11 @@ def customer_register_screen(intro_window):
                     address = values[ADDRESS_VAL]
                     phone = int(values[PHONE_NUMBER_VAL])
                     password = values[PASSWORD_VAL]
-                    admin_id = insert_customer(username, name, gender, email, address, phone, password)
+                    cust_id = insert_customer(username, name, gender, email, address, phone, password)
+                    set_current_user(Customer(cust_id, name, gender, email, address, phone))
                     window.close()
                     intro_window.close()
-                    customer_screen(admin_id, name, gender, email, address, phone)
+                    customer_screen()
                 break
             except ValueError as e:
                 if str(e) == 'Username taken':
