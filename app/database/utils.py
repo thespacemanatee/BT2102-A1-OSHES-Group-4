@@ -1,9 +1,19 @@
+import json
+
 from app.database.setup import mysql_client, Products, Items
 
 
 def initialise_mysql_database():
+    Products.remove({})
+    with open('data/products.json') as products:
+        Products.insert_many(json.load(products))
+
+    Items.remove({})
+    with open('data/items.json') as items:
+        Items.insert_many(json.load(items))
+        
     cursor = mysql_client.cursor()
-    with open('app/database/mysql_init.sql') as f:
+    with open('data/mysql_init.sql') as f:
         results = cursor.execute(f.read(), multi=True)
         for result in results:
             continue
