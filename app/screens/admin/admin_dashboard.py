@@ -31,11 +31,7 @@ TABLE_HEADERS = [
 ]
 
 
-def administrator_screen(admin_id, name, gender, phone):
-    print(admin_id, name, gender, phone)
-    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))],
-                   [sg.Text(f'Payment Pending', font=('Arial', 24))]]
-
+def search_tab_screen(table_data):
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']
     category_row = category_component(cat)
@@ -60,21 +56,29 @@ def administrator_screen(admin_id, name, gender, phone):
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_data, item_data = get_filtered_results(admin=True)
     table_layout = search_table_component(table_data, TABLE_HEADERS)
 
-    search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
-                     category_row,
-                     model_row,
-                     item_search_component(),
-                     [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
-                     [colors_filter_row, factories_filter_row],
-                     [power_supplies_filter_row, production_years_filter_row],
-                     [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
-                                  sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
-                                element_justification='center')],
-                     table_layout
-                     ]
+    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
+            category_row,
+            model_row,
+            item_search_component(),
+            [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
+            [colors_filter_row, factories_filter_row],
+            [power_supplies_filter_row, production_years_filter_row],
+            [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
+                         sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
+                       element_justification='center')],
+            table_layout
+            ]
+
+
+def administrator_screen(admin_id, name, gender, phone):
+    print(admin_id, name, gender, phone)
+    table_data, item_data = get_filtered_results(admin=True)
+    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))],
+                   [sg.Text(f'Payment Pending', font=('Arial', 24))]]
+
+    search_layout = search_tab_screen(table_data)
 
     request_layout = [
         [sg.Text('request servicing for your purchased item here')]]
@@ -132,9 +136,9 @@ def administrator_screen(admin_id, name, gender, phone):
                 power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
                 production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
                 table_data, item_data = get_filtered_results(admin=True, category=category, model=model,
-                                           color=color,
-                                           factory=factory,
-                                           power_supply=power_supply, production_year=production_year)
+                                                             color=color,
+                                                             factory=factory,
+                                                             power_supply=power_supply, production_year=production_year)
                 window[SEARCH_TABLE].update(values=table_data)
 
         elif event == RESET_BUTTON:

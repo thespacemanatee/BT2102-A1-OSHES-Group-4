@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
 from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
+from app.utils import setup_window
 
 
 def item_summary_popup(user_input, item):
@@ -43,7 +44,7 @@ def item_summary_popup(user_input, item):
         layout = centered_component(top_children=sg.Text(f"Item ID: {user_input} not found. Did you enter a valid ID?"),
                                     centered_children=[sg.Ok(s=10)])
 
-    popup = sg.Window(f'Item ID: {user_input}', layout, keep_on_top=True, finalize=True)
+    popup = setup_window(f'Item ID: {user_input}', layout, keep_on_top=True)
     popup[COLUMN].expand(True, True, True)
     popup[EXPAND_1].expand(True, True, True)
     popup[EXPAND_2].expand(True, False, True)

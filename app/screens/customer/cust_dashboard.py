@@ -16,7 +16,7 @@ from app.components.category_component import category_component, CATEGORY_RADIO
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 
-TABLE_HEADERS = [
+SEARCH_TABLE_HEADERS = [
     'IID',
     'Category',
     'Model',
@@ -24,12 +24,32 @@ TABLE_HEADERS = [
     'Warranty (months)',
     'Stock'
 ]
+PURCHASE_TABLE_HEADERS = ['IID', 'Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year']
 
 
-def customer_screen(admin_id, name, gender, email, address, phone):
-    print(admin_id, name, gender, email, address, phone)
-    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))]]
+def item_purchase_window(item_list):
+    layout = [[
+        sg.Table(values=item_list, headings=PURCHASE_TABLE_HEADERS,
+                 auto_size_columns=True,
+                 justification='right',
+                 num_rows=20,
+                 alternating_row_color='lightyellow',
+                 key=SEARCH_TABLE,
+                 row_height=35,
+                 tooltip='Search Results',
+                 enable_events=True
+                 )
+    ]]
 
+    window = setup_window("Purchase", layout)
+
+    while True:
+        event, values = window.read()
+        if event == sg.WIN_CLOSED:
+            break
+
+
+def search_tab_screen(table_data):
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']
     category_row = category_component(cat)
@@ -54,20 +74,27 @@ def customer_screen(admin_id, name, gender, email, address, phone):
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_data, item_data = get_filtered_results()
-    table_layout = search_table_component(table_data, TABLE_HEADERS)
+    table_layout = search_table_component(table_data, SEARCH_TABLE_HEADERS)
 
-    search_layout = [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
-                     category_row,
-                     model_row,
-                     [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
-                     [colors_filter_row, factories_filter_row],
-                     [power_supplies_filter_row, production_years_filter_row],
-                     [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
-                                  sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
-                                element_justification='center')],
-                     table_layout
-                     ]
+    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
+            category_row,
+            model_row,
+            [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
+            [colors_filter_row, factories_filter_row],
+            [power_supplies_filter_row, production_years_filter_row],
+            [sg.Column([[sg.Button('Search', key=SEARCH_BUTTON, size=25, pad=(10, 25)),
+                         sg.Button('Reset', key=RESET_BUTTON, size=25, pad=(10, 25))]], justification='center',
+                       element_justification='center')],
+            table_layout
+            ]
+
+
+def customer_screen(admin_id, name, gender, email, address, phone):
+    print(admin_id, name, gender, email, address, phone)
+    table_data, item_data = get_filtered_results()
+    main_layout = [[sg.Text(f'Welcome, {name}.', font=('Arial', 32))]]
+
+    search_layout = search_tab_screen(table_data)
 
     request_layout = [[sg.Text('request servicing for your purchased item here')]]
 
@@ -107,11 +134,16 @@ def customer_screen(admin_id, name, gender, email, address, phone):
             power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
             production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
             table_data, item_data = get_filtered_results(category=category, model=model, color=color, factory=factory,
-                                              power_supply=power_supply, production_year=production_year)
+                                                         power_supply=power_supply, production_year=production_year)
             window[SEARCH_TABLE].update(values=table_data)
 
         elif event == RESET_BUTTON:
             table_data, item_data = get_filtered_results()
             window[SEARCH_TABLE].update(values=table_data)
+
+        elif event == SEARCH_TABLE:
+            item_list = item_data[values[SEARCH_TABLE][0]]
+            print(item_data)
+            item_purchase_window(item_list)
 
     window.close()
