@@ -27,7 +27,7 @@ Navigate to project folder and type in the following commands:
 ```bash
 pipenv shell
 pipenv install
-python app/main.py
+python main.py
 ```
 
 ## First Launch
