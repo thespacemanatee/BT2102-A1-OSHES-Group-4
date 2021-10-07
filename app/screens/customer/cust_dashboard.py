@@ -213,9 +213,19 @@ def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
 
+    def _get_filtered_results():
+        category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
+        model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
+        color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
+        factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
+        power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
+        production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
+        return get_filtered_results(category=category, model=model, color=color, factory=factory,
+                                    power_supply=power_supply, production_year=production_year)
+
     def update_search_table():
         nonlocal table_data, item_data
-        table_data, item_data = get_filtered_results()
+        table_data, item_data = _get_filtered_results()
         window[SEARCH_TABLE].update(values=table_data)
 
     search_layout = search_tab_screen(table_data)
@@ -259,14 +269,7 @@ def customer_screen():
             window[CATEGORY_OPTION].update(disabled=True)
 
         elif event == SEARCH_BUTTON:
-            category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
-            model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
-            color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
-            factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
-            power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
-            production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-            table_data, item_data = get_filtered_results(category=category, model=model, color=color, factory=factory,
-                                                         power_supply=power_supply, production_year=production_year)
+            table_data, item_data = _get_filtered_results()
             window[SEARCH_TABLE].update(values=table_data)
 
         elif event == RESET_BUTTON:
