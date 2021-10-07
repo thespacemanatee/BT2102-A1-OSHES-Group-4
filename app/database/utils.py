@@ -211,13 +211,7 @@ def get_filtered_results(admin=False, category=None, model=None,
                 'ProductionYear': item['ProductionYear'],
             }
             temp_items.append(item)
-
         temp_items = [i for n, i in enumerate(temp_items) if i not in temp_items[n + 1:]]
-        for item in temp_items:
-            temp_item = item.copy()
-            temp_item['PurchaseStatus'] = 'Unsold'
-            count = len(list(Items.find(temp_item)))
-            item['Stock'] = count
         final_items.append(temp_items)
         temp = list(product.values())
         temp.append(len(unsold_items))
@@ -226,6 +220,16 @@ def get_filtered_results(admin=False, category=None, model=None,
         final_values.append(temp)
 
     return final_values, final_items
+
+
+def get_stock_levels(unsold_items):
+    counts = []
+    for item in unsold_items:
+        temp_item = item.copy()
+        temp_item['PurchaseStatus'] = 'Unsold'
+        count = len(list(Items.find(temp_item)))
+        counts.append(count)
+    return counts
 
 
 def find_product_by_category_and_model(category, model):

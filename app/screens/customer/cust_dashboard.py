@@ -1,3 +1,5 @@
+import copy
+
 import PySimpleGUI as sg
 
 from app.auth import get_current_user
@@ -11,7 +13,7 @@ from app.components.production_years_filter_component import production_years_fi
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item
+    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
@@ -32,7 +34,7 @@ SEARCH_TABLE_HEADERS = [
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 
 
-def item_purchase_popup(purchase_window, product, item, update_search_table):
+def item_purchase_popup(purchase_window, product, item, update_search_table, update_stock_levels):
     user = get_current_user()
     layout = centered_component(top_children=[
         sg.Column([
@@ -78,30 +80,46 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
             break
 
         elif event == 'Purchase':
-            quantity = int(values[QUANTITY_VAL])
-            if quantity > item['Stock']:
-                popup[WRONG_ENTRY].update('Quantity exceeded.', text_color='red')
+            try:
+                quantity = int(values[QUANTITY_VAL])
+                if quantity > item['Stock']:
+                    popup[WRONG_ENTRY].update('Quantity exceeded.', text_color='red')
 
-            else:
-                purchase_item(user.id, {
-                    'Category': item['Category'],
-                    'Model': item['Model'],
-                    'Color': item['Color'],
-                    'Factory': item['Factory'],
-                    'PowerSupply': item['PowerSupply'],
-                    'ProductionYear': item['ProductionYear'],
-                }, int(values[QUANTITY_VAL]))
-                update_search_table()
-                popup.close()
-                purchase_window.close()
-                break
+                else:
+                    purchase_item(user.id, {
+                        'Category': item['Category'],
+                        'Model': item['Model'],
+                        'Color': item['Color'],
+                        'Factory': item['Factory'],
+                        'PowerSupply': item['PowerSupply'],
+                        'ProductionYear': item['ProductionYear'],
+                    }, int(values[QUANTITY_VAL]))
+                    update_search_table()
+                    update_stock_levels()
+                    popup.close()
+                    break
+            except ValueError:
+                popup[WRONG_ENTRY].update('Please enter a number.', text_color='red')
 
     popup.close()
 
 
+def setup_purchase_table(item_list):
+    item_list_copy = copy.deepcopy(item_list)
+    counts = get_stock_levels(item_list_copy)
+    for j in range(len(item_list_copy)):
+        item_list_copy[j]['Stock'] = counts[j]
+    return item_list_copy, [list(item.values()) for item in item_list_copy]
+
+
 def item_purchase_window(item_list, update_search_table):
+    item_list_copy, table_data = setup_purchase_table(item_list)
     product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
-    table_data = [list(item.values()) for item in item_list]
+
+    def update_stock_levels():
+        nonlocal item_list_copy, table_data
+        item_list_copy, table_data = setup_purchase_table(item_list)
+        window[PURCHASE_TABLE].update(values=table_data)
 
     layout = centered_component(top_children=[[
         sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
@@ -114,18 +132,21 @@ def item_purchase_window(item_list, update_search_table):
                  tooltip='Item List',
                  enable_events=True
                  )
-    ]], centered_children=[sg.Button('Cancel', size=10)])
+    ]], centered_children=[sg.Button('Done', size=10)])
 
     window = setup_window(f"Purchase Product: {product['Category']}, Model: {product['Model']}", layout)
 
     while True:
         event, values = window.read()
-        if event in ('Cancel', sg.WIN_CLOSED):
+        if event in ('Done', sg.WIN_CLOSED):
             break
 
         if event == PURCHASE_TABLE:
-            item = item_list[values[PURCHASE_TABLE][0]]
-            item_purchase_popup(window, product, item, update_search_table)
+            try:
+                item = item_list_copy[values[PURCHASE_TABLE][0]]
+                item_purchase_popup(window, product, item, update_search_table, update_stock_levels)
+            except IndexError:
+                continue
 
     window.close()
 
@@ -230,6 +251,9 @@ def customer_screen():
 
         elif event == SEARCH_TABLE:
             item_list = item_data[values[SEARCH_TABLE][0]]
-            item_purchase_window(item_list, update_search_table)
+            if len(item_list) > 0:
+                item_purchase_window(item_list, update_search_table)
+            else:
+                sg.popup('No Stock')
 
     window.close()
