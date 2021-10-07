@@ -59,7 +59,7 @@ def item_purchase_popup(purchase_window, product, item, update_search_table):
             element_justification='right',
             pad=20
         )
-    ], centered_children=[sg.Column([[sg.Text('Quantity'), sg.Input(k=QUANTITY_VAL, s=10)],
+    ], centered_children=[sg.Column([[sg.Text(f'Quantity: ({item["Stock"]} left)'), sg.Input(k=QUANTITY_VAL, s=9)],
                                      [sg.Text(k=WRONG_ENTRY)],
                                      [sg.Column([[
                                          sg.Button('Purchase', s=10), sg.Button('Cancel', s=10)]
