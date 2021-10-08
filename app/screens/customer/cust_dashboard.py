@@ -40,16 +40,21 @@ def purchase_history_tab_screen():
     user = get_current_user()
     history = find_complete_item_information_by_id(user.id)
     table_data = [[item['id'], item['category'], item['model'], item['purchase_date']] for item in history]
-    return [
-        [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
-                  justification='right',
-                  num_rows=18,
-                  alternating_row_color='lightyellow',
-                  key=HISTORY_TABLE,
-                  row_height=35,
-                  tooltip='Purchase History',
-                  enable_events=True)]
-    ]
+    if len(table_data) > 0:
+        return [
+            [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
+                      justification='right',
+                      num_rows=18,
+                      alternating_row_color='lightyellow',
+                      key=HISTORY_TABLE,
+                      row_height=35,
+                      tooltip='Purchase History',
+                      enable_events=True)]
+        ]
+    else:
+        return [
+            [sg.Text('You have no past purchases.')]
+        ]
 
 
 def item_purchase_popup(purchase_window, product, item, update_search_table, update_stock_levels):
