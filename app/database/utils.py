@@ -1,3 +1,4 @@
+from datetime import date, timedelta
 import json
 
 from app.database.setup import mysql_client, Products, Items
@@ -263,7 +264,7 @@ def find_product_by_id(product_id):
     return result
 
 
-def get_purchase_history(customer_id):
+def get_purchase_history_by_id(customer_id):
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
@@ -277,7 +278,7 @@ def get_purchase_history(customer_id):
     return result
 
 
-def get_item_information(item_id):
+def get_item_information_by_id(item_id):
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
@@ -290,3 +291,17 @@ def get_item_information(item_id):
         cursor.close()
 
     return result
+
+
+def set_request_status_by_id(item, service_status):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item['id']))
+        mysql_client.commit()
+        cursor.close()
+
+
+def get_service_status(purchase_date: date, warranty: int) -> str:
+    if date.today() - purchase_date > timedelta(days=warranty * 30):
+        return 'Submitted and Waiting for payment'
+    return 'Submitted'

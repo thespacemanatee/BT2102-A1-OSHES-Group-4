@@ -13,9 +13,11 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    get_purchase_history, get_item_information
+    get_purchase_history_by_id, get_item_information_by_id, set_request_status_by_id, get_service_status
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
+
+REQUEST_SERVICING_BUTTON = 'request_servicing_button'
 
 HISTORY_TABLE_GROUP = 'history_table_group'
 
@@ -54,6 +56,27 @@ SEARCH_TABLE_HEADERS = [
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date', 'Service Status']
+
+
+def request_servicing_popup(item, update_purchase_history):
+    layout = [
+        [sg.Text(f'Request servicing for Item ID: {item["id"]}?')],
+        [sg.Button('Confirm')],
+        [sg.Button('Cancel')],
+    ]
+    window = setup_window('Request for Servicing', layout)
+    while True:
+        event, values = window.read()
+        if event in ['Cancel', sg.WIN_CLOSED]:
+            break
+
+        elif event == 'Confirm':
+            service_status = get_service_status(item['purchase_date'], item['warranty'])
+            set_request_status_by_id(item, service_status)
+            update_purchase_history()
+            break
+
+    window.close()
 
 
 def purchase_history_tab_screen(history):
@@ -95,6 +118,8 @@ def purchase_history_tab_screen(history):
                         [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
                     ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
                 ],
+                [sg.Button('Request for Servicing', expand_x=True, pad=(0, 20), visible=False,
+                           key=REQUEST_SERVICING_BUTTON)],
             ], expand_y=True, expand_x=True, key=HISTORY_ITEM_DETAILS_COLUMN, pad=((10, 0), (0, 0))),
             sg.Column([
                 [sg.Text('Click on an item to view details.')],
@@ -275,7 +300,7 @@ def search_tab_screen(table_data):
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
-    history = get_purchase_history(user.id)
+    history = get_purchase_history_by_id(user.id)
     is_after_reset = True
 
     def _get_filtered_results():
@@ -300,7 +325,7 @@ def customer_screen():
 
     def update_purchase_history():
         nonlocal history
-        history = get_purchase_history(user.id)
+        history = get_purchase_history_by_id(user.id)
         window[NO_PAST_PURCHASE_TEXT].update(visible=False)
         window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history], visible=True)
 
@@ -365,7 +390,11 @@ def customer_screen():
         elif event == HISTORY_TABLE:
             index = values[HISTORY_TABLE][0]
             item = history[index]
-            item = get_item_information(item['id'])
+            item = get_item_information_by_id(item['id'])
+            if item['service_status'] in ['', 'Canceled', 'Completed']:
+                window[REQUEST_SERVICING_BUTTON].update(visible=True)
+            else:
+                window[REQUEST_SERVICING_BUTTON].update(visible=False)
             window[HISTORY_ITEM_TITLE_TEXT].update(visible=False)
             window[HISTORY_TABLE_KEY].update(visible=True)
             window[HISTORY_TABLE_VALUE].update(visible=True)
@@ -381,5 +410,11 @@ def customer_screen():
             window[ITEM_SERVICE_STATUS_TEXT].update(f'{item["service_status"]}')
             window[ITEM_SERVICED_BY_TEXT].update(f'{item["name"]}')
             window[ITEM_PURCHASE_DATE_TEXT].update(f'{item["purchase_date"]}')
+
+        elif event == REQUEST_SERVICING_BUTTON:
+            index = values[HISTORY_TABLE][0]
+            item = history[index]
+            item = get_item_information_by_id(item['id'])
+            request_servicing_popup(item, update_purchase_history)
 
     window.close()
