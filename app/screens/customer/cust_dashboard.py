@@ -58,8 +58,7 @@ SEARCH_TABLE_HEADERS = [
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 HISTORY_TABLE_HEADERS = ['IID', 'Model', 'Purchase Date']
-REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount', 'Service Payment Date', 'Request Status',
-                          'Request Date', 'Serviced By']
+REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount', 'Payment Date', 'Request Status', 'Request Date', 'Serviced By']
 
 
 def request_servicing_popup(item, update_purchase_history, update_service_requests):
@@ -127,6 +126,7 @@ def purchase_history_tab_screen(history):
                 [sg.Text('Click on an item to view details.')],
                 [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
                           auto_size_columns=False,
+                          col_widths=[5, 15, 15],
                           justification='right',
                           num_rows=18,
                           alternating_row_color='lightyellow',
@@ -326,6 +326,7 @@ def home_tab_screen():
         [sg.Text('Pending Payment', font=('Arial', 24))],
         [sg.Table(values=pending_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
+                  col_widths=[5, 15, 15, 15, 15, 10],
                   justification='right',
                   num_rows=5,
                   alternating_row_color='lightyellow',
@@ -337,6 +338,7 @@ def home_tab_screen():
         [sg.Text('Completed Service Requests', font=('Arial', 24))],
         [sg.Table(values=requests_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
+                  col_widths=[5, 15, 15, 15, 15, 10],
                   justification='right',
                   num_rows=10,
                   alternating_row_color='lightyellow',
