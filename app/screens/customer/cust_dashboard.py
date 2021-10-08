@@ -35,7 +35,7 @@ SEARCH_TABLE_HEADERS = [
     'Stock'
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
-HISTORY_TABLE_HEADERS = ['Item ID', 'Category', 'Model', 'Purchase Date']
+HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date', 'Service Status']
 
 
 def purchase_history_tab_screen(history):
@@ -151,18 +151,19 @@ def item_purchase_window(item_list, update_search_table):
         window[PURCHASE_TABLE].update(values=table_data)
 
     layout = centered_component(
-        top_children=[[sg.Text(f"Product: {product['Category']}; Model: {product['Model']}")], [
-            sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
-                     justification='right',
-                     num_rows=10,
-                     alternating_row_color='lightyellow',
-                     key=PURCHASE_TABLE,
-                     row_height=35,
-                     tooltip='Item List',
-                     enable_events=True,
-                     pad=(10, 20)
-                     )
-        ]], centered_children=[sg.Button('Done', size=10)])
+        top_children=[[sg.Text(f"Product: {product['Category']}; Model: {product['Model']}")],
+                      [sg.Text('Click on an item to purchase.')],
+                      [sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
+                                justification='right',
+                                num_rows=10,
+                                alternating_row_color='lightyellow',
+                                key=PURCHASE_TABLE,
+                                row_height=35,
+                                tooltip='Item List',
+                                enable_events=True,
+                                pad=(10, 10)
+                                )]
+                      ], centered_children=[sg.Button('Done', size=10)])
 
     window = setup_window('Purchase an Item', layout)
 
@@ -216,6 +217,7 @@ def search_tab_screen(table_data):
             [power_supplies_filter_row, production_years_filter_row],
             [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
              sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
+            [sg.Text('Click on a product to view available items.')],
             table_layout
             ]
 
