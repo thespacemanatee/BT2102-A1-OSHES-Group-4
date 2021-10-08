@@ -17,6 +17,8 @@ from app.database.utils import get_categories, get_models, get_colors, get_facto
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
+HISTORY_TABLE_GROUP = 'history_table_group'
+
 NO_PAST_PURCHASE_TEXT = 'NO_PAST_PURCHASE_TEXT'
 ITEM_ID_TEXT = 'item_id_text'
 ITEM_CATEGORY_TEXT = 'item_category_text'
@@ -56,13 +58,13 @@ HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date', 'Service Status']
 
 def purchase_history_tab_screen(history):
     table_data = [list(item.values()) for item in history]
-    table_data = table_data if len(table_data) > 0 else HISTORY_TABLE_HEADERS
+    table_data = table_data if len(table_data) > 0 else [['' for item in HISTORY_TABLE_HEADERS]]
 
     return [
-        [sg.Text('You have no past purchases.', key=NO_PAST_PURCHASE_TEXT, visible=(not len(history)) > 0)],
+        [sg.Text('You have no past purchases.', key=NO_PAST_PURCHASE_TEXT, visible=(not len(history) > 0))],
         [
             sg.Column([
-                [sg.Text('No item selected.' + ' ' * 30, key=HISTORY_ITEM_TITLE_TEXT, visible=(len(history) > 0),
+                [sg.Text('No item selected.' + ' ' * 30, key=HISTORY_ITEM_TITLE_TEXT,
                          pad=((5, 0), (5, 20)))],
                 [sg.Column([
                     [sg.Text('Item ID:')],
@@ -105,7 +107,7 @@ def purchase_history_tab_screen(history):
                           tooltip='Purchase History',
                           enable_events=True),
                  ]
-            ], visible=(len(history)) > 0)
+            ], key=HISTORY_TABLE_GROUP)
         ],
     ]
 
@@ -308,11 +310,11 @@ def customer_screen():
 
     logout_layout = [[
         sg.Column([
-            [sg.Text(' ' * 405, font=('Arial', 1))],
+            [sg.Text(' ' * 460, font=('Arial', 1))],
             [sg.Text(f'Welcome, {user.name}.', font=('Arial', 24))],
         ], element_justification='left'),
         sg.Column([
-            [sg.Text(' ' * 405, font=('Arial', 1))],
+            [sg.Text(' ' * 460, font=('Arial', 1))],
             [sg.Button('Log Out')]
         ], element_justification='right'),
     ]]
