@@ -75,6 +75,22 @@ def search_tab_screen(table_data):
 def administrator_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
+    is_after_reset = True
+
+    def _get_filtered_results():
+        nonlocal is_after_reset
+        if is_after_reset:
+            return get_filtered_results(admin=True)
+
+        else:
+            category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
+            model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
+            color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
+            factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
+            power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
+            production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
+            return get_filtered_results(admin=True, category=category, model=model, color=color, factory=factory,
+                                        power_supply=power_supply, production_year=production_year)
 
     search_layout = search_tab_screen(table_data)
 
@@ -128,25 +144,18 @@ def administrator_screen():
             window[CATEGORY_OPTION].update(disabled=True)
 
         elif event == SEARCH_BUTTON:
+            is_after_reset = False
             if values[ITEM_SEARCH_RADIO]:
                 user_input = values[ITEM_SEARCH_VAL]
                 res = find_item_by_id(user_input)
                 item_summary_popup(user_input, res)
 
-            elif not values[ITEM_SEARCH_RADIO]:
-                category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
-                model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
-                color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
-                factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
-                power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
-                production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-                table_data, item_data = get_filtered_results(admin=True, category=category, model=model,
-                                                             color=color,
-                                                             factory=factory,
-                                                             power_supply=power_supply, production_year=production_year)
+            else:
+                table_data, item_data = _get_filtered_results()
                 window[SEARCH_TABLE].update(values=table_data)
 
         elif event == RESET_BUTTON:
+            is_after_reset = True
             table_data, item_data = get_filtered_results(admin=True)
             window[SEARCH_TABLE].update(values=table_data)
 

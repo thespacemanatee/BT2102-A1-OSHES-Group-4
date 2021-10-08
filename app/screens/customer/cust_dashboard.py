@@ -17,6 +17,8 @@ from app.database.utils import get_categories, get_models, get_colors, get_facto
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
+HISTORY_ITEM_TITLE_TEXT = 'history_item_title_text'
+HISTORY_ITEM_DETAILS_COLUMN = 'history_item_details_column'
 WRONG_ENTRY = 'wrong_entry'
 QUANTITY_VAL = 'quantity_val'
 RESET_BUTTON = 'reset_button'
@@ -36,12 +38,12 @@ PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply
 HISTORY_TABLE_HEADERS = ['Item ID', 'Category', 'Model', 'Purchase Date']
 
 
-def purchase_history_tab_screen():
-    user = get_current_user()
-    history = get_purchase_history(user.id)
+def purchase_history_tab_screen(history):
     table_data = [list(item.values()) for item in history]
+
     if len(table_data) > 0:
         return [
+            [sg.Text('Click on an item to view details.')],
             [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
                       justification='right',
                       num_rows=18,
@@ -49,7 +51,11 @@ def purchase_history_tab_screen():
                       key=HISTORY_TABLE,
                       row_height=35,
                       tooltip='Purchase History',
-                      enable_events=True)]
+                      enable_events=True),
+             sg.Column([
+                 [sg.Text('No item selected.', key=HISTORY_ITEM_TITLE_TEXT)]
+             ], expand_y=True, key=HISTORY_ITEM_DETAILS_COLUMN),
+             ]
         ]
     else:
         return [
@@ -57,7 +63,7 @@ def purchase_history_tab_screen():
         ]
 
 
-def item_purchase_popup(purchase_window, product, item, update_search_table, update_stock_levels):
+def item_purchase_popup(product, item, update_search_table, update_stock_levels):
     user = get_current_user()
     layout = centered_component(top_children=[
         sg.Column([
@@ -168,7 +174,7 @@ def item_purchase_window(item_list, update_search_table):
         if event == PURCHASE_TABLE:
             try:
                 item = item_list_copy[values[PURCHASE_TABLE][0]]
-                item_purchase_popup(window, product, item, update_search_table, update_stock_levels)
+                item_purchase_popup(product, item, update_search_table, update_stock_levels)
             except IndexError:
                 continue
 
@@ -217,6 +223,7 @@ def search_tab_screen(table_data):
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
+    history = get_purchase_history(user.id)
     is_after_reset = True
 
     def _get_filtered_results():
@@ -241,7 +248,7 @@ def customer_screen():
 
     search_layout = search_tab_screen(table_data)
 
-    request_layout = purchase_history_tab_screen()
+    request_layout = purchase_history_tab_screen(history)
 
     logout_layout = [[
         sg.Column([
@@ -296,5 +303,10 @@ def customer_screen():
                 item_purchase_window(item_list, update_search_table)
             else:
                 sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
+
+        elif event == HISTORY_TABLE:
+            index = values[HISTORY_TABLE][0]
+            item = history[index]
+            window[HISTORY_ITEM_TITLE_TEXT].update(f'Item ID: {item["id"]}')
 
     window.close()
