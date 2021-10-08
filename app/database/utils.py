@@ -46,47 +46,53 @@ def initialise_mysql_database():
 
 
 def is_admin_username_taken(username):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('SELECT id FROM administrator WHERE id = %s', (username,))
-    cursor.fetchone()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT id FROM administrator WHERE id = %s', (username,))
+        cursor.fetchone()
+        result = True if cursor.rowcount > 0 else False
+        cursor.close()
 
-    return True if cursor.rowcount > 0 else False
+    return result
 
 
 def is_cust_username_taken(username):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('SELECT id FROM customer WHERE id = %s', (username,))
-    cursor.fetchone()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT id FROM customer WHERE id = %s', (username,))
+        cursor.fetchone()
+        result = True if cursor.rowcount > 0 else False
+        cursor.close()
 
-    return True if cursor.rowcount > 0 else False
+    return result
 
 
 def insert_administrator(username, name, gender, phone, password):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('INSERT INTO administrator (id, name, gender, phone, password) VALUES (%s,%s, %s, %s, %s)',
-                   (username, name, gender, phone, password))
-    mysql_client.commit()
-    cursor.close()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('INSERT INTO administrator (id, name, gender, phone, password) '
+                       'VALUES (%s,%s, %s, %s, %s)', (username, name, gender, phone, password))
+        mysql_client.commit()
+        cursor.close()
 
 
 def insert_customer(username, name, gender, email, address, phone, password):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute(
-        'INSERT INTO customer (id, name, gender, email, address, phone, password) VALUES (%s,%s, %s, %s, %s, %s, %s)',
-        (username, name, gender, email, address, phone, password))
-    mysql_client.commit()
-    cursor.close()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute(
+            'INSERT INTO customer (id, name, gender, email, address, phone, password) '
+            'VALUES (%s,%s, %s, %s, %s, %s, %s)',
+            (username, name, gender, email, address, phone, password))
+        mysql_client.commit()
+        cursor.close()
 
 
 def validate_administrator_login(username, password):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('SELECT * FROM administrator WHERE id = %s AND password = %s', (username, password))
-    results = cursor.fetchone()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT * FROM administrator WHERE id = %s AND password = %s', (username, password))
+        results = cursor.fetchone()
+        cursor.close()
 
     if results is None:
         return False, "", "", "", ""
@@ -95,10 +101,11 @@ def validate_administrator_login(username, password):
 
 
 def validate_customer_login(username, password):
-    cursor = mysql_client.cursor()
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('SELECT * FROM customer WHERE id = %s AND password = %s', (username, password))
-    results = cursor.fetchone()
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT * FROM customer WHERE id = %s AND password = %s', (username, password))
+        results = cursor.fetchone()
+        cursor.close()
 
     if results is None:
         return False, "", "", "", "", "", ""
@@ -247,22 +254,24 @@ def find_item_by_id(item_id):
 
 
 def find_product_by_id(product_id):
-    cursor = mysql_client.cursor(dictionary=True)
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute('SELECT * FROM product WHERE id = %s', (product_id,))
-    return cursor.fetchone()
+    with mysql_client.cursor(dictionary=True) as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT * FROM product WHERE id = %s', (product_id,))
+        result = cursor.fetchone()
+        cursor.close()
+
+    return result
 
 
-def find_complete_item_information_by_id(customer_id):
-    cursor = mysql_client.cursor(dictionary=True)
-    cursor.execute('USE `db.OSHES`;')
-    cursor.execute(
-        'SELECT * FROM item WHERE customer_id = %s', (customer_id,))
+def get_purchase_history(customer_id):
+    with mysql_client.cursor(dictionary=True) as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute(
+            'SELECT item.id, product.category, product.model, item.purchase_date FROM item '
+            'INNER JOIN product ON item.product_id = product.id '
+            'WHERE customer_id = %s',
+            (customer_id,))
+        result = cursor.fetchall()
+        cursor.close()
 
-    def get_product(product_id):
-        res = find_product_by_id(product_id)
-        res['product_id'] = res['id']
-        del res['id']
-        return res
-
-    return [{**item, **get_product(item['product_id'])} for item in cursor.fetchall()]
+    return result

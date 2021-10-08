@@ -13,7 +13,7 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    find_complete_item_information_by_id
+    get_purchase_history
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
@@ -38,8 +38,8 @@ HISTORY_TABLE_HEADERS = ['Item ID', 'Category', 'Model', 'Purchase Date']
 
 def purchase_history_tab_screen():
     user = get_current_user()
-    history = find_complete_item_information_by_id(user.id)
-    table_data = [[item['id'], item['category'], item['model'], item['purchase_date']] for item in history]
+    history = get_purchase_history(user.id)
+    table_data = [list(item.values()) for item in history]
     if len(table_data) > 0:
         return [
             [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
@@ -217,7 +217,7 @@ def search_tab_screen(table_data):
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
-    is_after_reset = False
+    is_after_reset = True
 
     def _get_filtered_results():
         nonlocal is_after_reset
