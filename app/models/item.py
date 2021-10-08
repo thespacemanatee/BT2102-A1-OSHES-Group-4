@@ -4,7 +4,8 @@ from typing import Union
 
 
 class Item:
-    def __init__(self, item_id, colour, power_supply, factory, production_year, purchase_status, service_status, purchase_date,
+    def __init__(self, item_id, colour, power_supply, factory, production_year, purchase_status, service_status,
+                 purchase_date,
                  customer_id, admin_id, product_id):
         self.item_id = item_id
         self.colour: str = colour

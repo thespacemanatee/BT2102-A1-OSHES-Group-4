@@ -3,6 +3,7 @@ import json
 from typing import Tuple
 
 from app.database.setup import mysql_client, Products, Items
+from app.models.request import Request, RequestStatus
 
 
 def initialise_mysql_database():
@@ -281,9 +282,9 @@ def get_item_information_by_id(item_id):
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
-            'SELECT item.id, product.category, product.model, product.price, item.colour, item.power_supply, '
-            'item.factory, item.production_year, product.warranty, item.service_status, administrator.name, '
-            'item.purchase_date FROM item INNER JOIN product ON item.product_id = product.id '
+            'SELECT item.id, product.category, product.model, product.price, product.cost, item.colour, '
+            'item.power_supply, item.factory, item.production_year, product.warranty, item.service_status, '
+            'administrator.name, item.purchase_date FROM item INNER JOIN product ON item.product_id = product.id '
             'LEFT JOIN administrator ON item.admin_id = administrator.id '
             'WHERE item.id = %s', (item_id,))
         result = cursor.fetchone()
@@ -307,16 +308,20 @@ def set_request_status_by_id(item, customer_id, request_status, service_status, 
 
 def get_request_status(item) -> Tuple[str, float]:
     if date.today() - item['purchase_date'] > timedelta(days=item['warranty'] * 30):
-        return 'Submitted and Waiting for payment', 40 + 0.2 * item['cost']
+        return 'Submitted and Waiting for payment', 40 + 0.2 * float(item['cost'])
     return 'Submitted', 0.00
 
 
-def find_service_requests_by_id_and_status(customer_id, request_status):
-    with mysql_client.cursor(dictionary=True) as cursor:
+def find_service_requests_by_id_and_status(customer_id: int, request_status: Tuple[str, ...]):
+    with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
-        cursor.execute('SELECT * FROM request WHERE customer_id = %s AND request_status = %s',
-                       (customer_id, request_status))
+        placeholders = ', '.join(['%s'] * len(request_status))
+        query = 'SELECT * FROM request WHERE customer_id = %s AND request_status IN ({})'.format(placeholders)
+        params = (customer_id,) + request_status
+        cursor.execute(query, params)
         result = cursor.fetchall()
+        result = [Request(request[0], request[1], request[2], request[3], request[4], request[5], request[6])
+                  for request in result]
         cursor.close()
 
     return result

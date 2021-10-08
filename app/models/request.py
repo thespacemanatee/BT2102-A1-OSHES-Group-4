@@ -18,7 +18,7 @@ class Request:
 class RequestStatus(enum.Enum):
     Empty = ''
     Submitted = 'Submitted'
-    WaitingForApproval = 'Submitted and Waiting for payment'
+    WaitingForPayment = 'Submitted and Waiting for payment'
     InProgress = 'In progress'
     Approved = 'Approved'
     Canceled = 'Canceled'
