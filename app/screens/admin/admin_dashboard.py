@@ -97,14 +97,8 @@ def administrator_screen():
     request_layout = [[sg.Text('request servicing for your purchased item here')]]
 
     logout_layout = [[
-        sg.Column([
-            [sg.Text(' ' * 480, font=('Arial', 1))],
-            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 24))],
-        ], element_justification='left'),
-        sg.Column([
-            [sg.Text(' ' * 480, font=('Arial', 1))],
-            [sg.Button('Log Out')]
-        ], element_justification='right'),
+        sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
+        sg.Button('Log Out'),
     ]]
 
     tab_layout = [[

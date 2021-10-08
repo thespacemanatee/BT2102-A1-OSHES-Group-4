@@ -1,5 +1,6 @@
 from datetime import date, timedelta
 import json
+from typing import Tuple
 
 from app.database.setup import mysql_client, Products, Items
 
@@ -27,8 +28,6 @@ def initialise_mysql_database():
              product['Warranty (months)']))
     cursor.executemany(
         'INSERT INTO product (id, category, model, cost, price, warranty) VALUES (%s, %s, %s, %s, %s, %s)', temp)
-
-    mysql_client.commit()
 
     items = Items.find({}, {'_id': False})
     temp = []
@@ -268,7 +267,7 @@ def get_purchase_history_by_id(customer_id):
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
-            'SELECT item.id, product.model, item.purchase_date, item.service_status FROM item '
+            'SELECT item.id, product.model, item.purchase_date FROM item '
             'INNER JOIN product ON item.product_id = product.id '
             'WHERE customer_id = %s',
             (customer_id,))
@@ -293,15 +292,31 @@ def get_item_information_by_id(item_id):
     return result
 
 
-def set_request_status_by_id(item, service_status):
+def set_request_status_by_id(item, customer_id, request_status, service_status, service_amount):
+    service_payment_date = date.today() + timedelta(days=10)
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item['id']))
+        cursor.execute(
+            'INSERT INTO request (service_amount, service_payment_date, request_status, request_date, customer_id) '
+            'VALUES (%s, %s, %s, %s, %s)',
+            (service_amount, service_payment_date, request_status, date.today(), customer_id))
         mysql_client.commit()
         cursor.close()
 
 
-def get_service_status(purchase_date: date, warranty: int) -> str:
-    if date.today() - purchase_date > timedelta(days=warranty * 30):
-        return 'Submitted and Waiting for payment'
-    return 'Submitted'
+def get_request_status(item) -> Tuple[str, int]:
+    if date.today() - item['purchase_date'] > timedelta(days=item['warranty'] * 30):
+        return 'Submitted and Waiting for payment', 40 + 0.2 * item['cost']
+    return 'Submitted', 0
+
+
+def find_service_requests_by_id_and_status(customer_id, request_status):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT * FROM request WHERE customer_id = %s AND request_status = %s',
+                       (customer_id, request_status))
+        result = cursor.fetchall()
+        cursor.close()
+
+    return result

@@ -13,7 +13,8 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    get_purchase_history_by_id, get_item_information_by_id, set_request_status_by_id, get_service_status
+    get_purchase_history_by_id, get_item_information_by_id, set_request_status_by_id, get_request_status, \
+    find_service_requests_by_id_and_status
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
@@ -21,7 +22,6 @@ REQUEST_SERVICING_BUTTON = 'request_servicing_button'
 
 HISTORY_TABLE_GROUP = 'history_table_group'
 
-NO_PAST_PURCHASE_TEXT = 'NO_PAST_PURCHASE_TEXT'
 ITEM_ID_TEXT = 'item_id_text'
 ITEM_CATEGORY_TEXT = 'item_category_text'
 ITEM_MODEL_TEXT = 'item_model_text'
@@ -55,15 +55,14 @@ SEARCH_TABLE_HEADERS = [
     'Stock'
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
-HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date', 'Service Status']
+HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date']
 
 
 def request_servicing_popup(item, update_purchase_history):
-    layout = [
+    user_id = get_current_user().id
+    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
         [sg.Text(f'Request servicing for Item ID: {item["id"]}?')],
-        [sg.Button('Confirm')],
-        [sg.Button('Cancel')],
-    ]
+    ])
     window = setup_window('Request for Servicing', layout)
     while True:
         event, values = window.read()
@@ -71,8 +70,8 @@ def request_servicing_popup(item, update_purchase_history):
             break
 
         elif event == 'Confirm':
-            service_status = get_service_status(item['purchase_date'], item['warranty'])
-            set_request_status_by_id(item, service_status)
+            request_status, service_amount = get_request_status(item)
+            set_request_status_by_id(item, user_id, request_status, 'Waiting for approval', service_amount)
             update_purchase_history()
             break
 
@@ -84,10 +83,9 @@ def purchase_history_tab_screen(history):
     table_data = table_data if len(table_data) > 0 else [['' for item in HISTORY_TABLE_HEADERS]]
 
     return [
-        [sg.Text('You have no past purchases.', key=NO_PAST_PURCHASE_TEXT, visible=(not len(history) > 0))],
         [
             sg.Column([
-                [sg.Text('No item selected.' + ' ' * 30, key=HISTORY_ITEM_TITLE_TEXT,
+                [sg.Text('No item selected.', key=HISTORY_ITEM_TITLE_TEXT,
                          pad=((5, 0), (5, 20)))],
                 [sg.Column([
                     [sg.Text('Item ID:')],
@@ -297,6 +295,16 @@ def search_tab_screen(table_data):
             ]
 
 
+def home_tab_screen():
+    user_id = get_current_user().id
+    res = find_service_requests_by_id_and_status(user_id, 'Submitted')
+    print(res)
+    return [[
+        sg.Text('Active Service Requests', font=('Arial', 24)),
+        sg.Text('')
+    ]]
+
+
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
@@ -326,27 +334,24 @@ def customer_screen():
     def update_purchase_history():
         nonlocal history
         history = get_purchase_history_by_id(user.id)
-        window[NO_PAST_PURCHASE_TEXT].update(visible=False)
+        window[REQUEST_SERVICING_BUTTON].update(visible=False)
         window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history], visible=True)
+
+    home_layout = home_tab_screen()
 
     search_layout = search_tab_screen(table_data)
 
     request_layout = purchase_history_tab_screen(history)
 
     logout_layout = [[
-        sg.Column([
-            [sg.Text(' ' * 460, font=('Arial', 1))],
-            [sg.Text(f'Welcome, {user.name}.', font=('Arial', 24))],
-        ], element_justification='left'),
-        sg.Column([
-            [sg.Text(' ' * 460, font=('Arial', 1))],
-            [sg.Button('Log Out')]
-        ], element_justification='right'),
+        sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
+        sg.Button('Log Out'),
     ]]
 
     tab_layout = [[
         logout_layout,
         sg.TabGroup([
+            [sg.Tab('         Home         ', [[sg.Column(home_layout, pad=25)]])],
             [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
             [sg.Tab('   Purchase History   ', [[sg.Column(request_layout, pad=25)]])],
         ])]
