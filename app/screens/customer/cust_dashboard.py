@@ -63,7 +63,7 @@ def purchase_history_tab_screen(history):
         ]
 
 
-def item_purchase_popup(product, item, update_search_table, update_stock_levels):
+def item_purchase_popup(product, item, update_search_table, update_stock_levels, update_purchase_history):
     user = get_current_user()
     layout = centered_component(top_children=[
         sg.Column([
@@ -125,6 +125,7 @@ def item_purchase_popup(product, item, update_search_table, update_stock_levels)
                     }, int(values[QUANTITY_VAL]))
                     update_search_table()
                     update_stock_levels()
+                    update_purchase_history()
                     popup.close()
                     break
             except ValueError:
@@ -141,7 +142,7 @@ def setup_purchase_table(item_list):
     return item_list_copy, [list(item.values()) for item in item_list_copy]
 
 
-def item_purchase_window(item_list, update_search_table):
+def item_purchase_window(item_list, update_search_table, update_purchase_history):
     item_list_copy, table_data = setup_purchase_table(item_list)
     product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
 
@@ -175,7 +176,7 @@ def item_purchase_window(item_list, update_search_table):
         if event == PURCHASE_TABLE:
             try:
                 item = item_list_copy[values[PURCHASE_TABLE][0]]
-                item_purchase_popup(product, item, update_search_table, update_stock_levels)
+                item_purchase_popup(product, item, update_search_table, update_stock_levels, update_purchase_history)
             except IndexError:
                 continue
 
@@ -248,6 +249,11 @@ def customer_screen():
         table_data, item_data = _get_filtered_results()
         window[SEARCH_TABLE].update(values=table_data)
 
+    def update_purchase_history():
+        nonlocal history
+        history = get_purchase_history(user.id)
+        window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history])
+
     search_layout = search_tab_screen(table_data)
 
     request_layout = purchase_history_tab_screen(history)
@@ -302,7 +308,7 @@ def customer_screen():
             index = values[SEARCH_TABLE][0]
             item_list = item_data[index]
             if len(item_list) > 0:
-                item_purchase_window(item_list, update_search_table)
+                item_purchase_window(item_list, update_search_table, update_purchase_history)
             else:
                 sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
 
