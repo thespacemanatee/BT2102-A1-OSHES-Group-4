@@ -13,10 +13,26 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    get_purchase_history
+    get_purchase_history, get_item_information
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
+NO_PAST_PURCHASE_TEXT = 'NO_PAST_PURCHASE_TEXT'
+ITEM_ID_TEXT = 'item_id_text'
+ITEM_CATEGORY_TEXT = 'item_category_text'
+ITEM_MODEL_TEXT = 'item_model_text'
+ITEM_PRICE_TEXT = 'item_price_text'
+ITEM_COLOR_TEXT = 'item_color_text'
+ITEM_POWER_SUPPLY_TEXT = 'item_power_supply_text'
+ITEM_FACTORY_TEXT = 'item_factory_text'
+ITEM_PRODUCTION_YEAR_TEXT = 'item_production_year_text'
+ITEM_WARRANTY_TEXT = 'item_warranty_text'
+ITEM_SERVICE_STATUS_TEXT = 'item_service_status_text'
+ITEM_SERVICED_BY_TEXT = 'item_serviced_by_text'
+ITEM_PURCHASE_DATE_TEXT = 'item_purchase_date_text'
+
+HISTORY_TABLE_VALUE = 'history_table_value'
+HISTORY_TABLE_KEY = 'history_table_key'
 HISTORY_ITEM_TITLE_TEXT = 'history_item_title_text'
 HISTORY_ITEM_DETAILS_COLUMN = 'history_item_details_column'
 WRONG_ENTRY = 'wrong_entry'
@@ -40,27 +56,58 @@ HISTORY_TABLE_HEADERS = ['Item ID', 'Model', 'Purchase Date', 'Service Status']
 
 def purchase_history_tab_screen(history):
     table_data = [list(item.values()) for item in history]
+    table_data = table_data if len(table_data) > 0 else HISTORY_TABLE_HEADERS
 
-    if len(table_data) > 0:
-        return [
-            [sg.Text('Click on an item to view details.')],
-            [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
-                      justification='right',
-                      num_rows=18,
-                      alternating_row_color='lightyellow',
-                      key=HISTORY_TABLE,
-                      row_height=35,
-                      tooltip='Purchase History',
-                      enable_events=True),
-             sg.Column([
-                 [sg.Text('No item selected.', key=HISTORY_ITEM_TITLE_TEXT)]
-             ], expand_y=True, key=HISTORY_ITEM_DETAILS_COLUMN),
-             ]
-        ]
-    else:
-        return [
-            [sg.Text('You have no past purchases.')]
-        ]
+    return [
+        [sg.Text('You have no past purchases.', key=NO_PAST_PURCHASE_TEXT, visible=(not len(history)) > 0)],
+        [
+            sg.Column([
+                [sg.Text('No item selected.' + ' ' * 30, key=HISTORY_ITEM_TITLE_TEXT, visible=(len(history) > 0),
+                         pad=((5, 0), (5, 20)))],
+                [sg.Column([
+                    [sg.Text('Item ID:')],
+                    [sg.Text('Category:')],
+                    [sg.Text('Model:')],
+                    [sg.Text('Price ($):')],
+                    [sg.Text('Color:')],
+                    [sg.Text('Power Supply:')],
+                    [sg.Text('Factory:')],
+                    [sg.Text('Production Year:')],
+                    [sg.Text('Warranty (months)')],
+                    [sg.Text('Service Status:')],
+                    [sg.Text('Serviced By:')],
+                    [sg.Text('Purchase Date:')],
+                ], key=HISTORY_TABLE_KEY, pad=((0, 10), (0, 0))),
+                    sg.Column([
+                        [sg.Text('', key=ITEM_ID_TEXT)],
+                        [sg.Text('', key=ITEM_CATEGORY_TEXT)],
+                        [sg.Text('', key=ITEM_MODEL_TEXT)],
+                        [sg.Text('', key=ITEM_PRICE_TEXT)],
+                        [sg.Text('', key=ITEM_COLOR_TEXT)],
+                        [sg.Text('', key=ITEM_POWER_SUPPLY_TEXT)],
+                        [sg.Text('', key=ITEM_FACTORY_TEXT)],
+                        [sg.Text('', key=ITEM_PRODUCTION_YEAR_TEXT)],
+                        [sg.Text('', key=ITEM_WARRANTY_TEXT)],
+                        [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
+                        [sg.Text('', key=ITEM_SERVICED_BY_TEXT)],
+                        [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
+                    ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
+                ],
+            ], expand_y=True, expand_x=True, key=HISTORY_ITEM_DETAILS_COLUMN, pad=((10, 0), (0, 0))),
+            sg.Column([
+                [sg.Text('Click on an item to view details.')],
+                [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
+                          justification='right',
+                          num_rows=18,
+                          alternating_row_color='lightyellow',
+                          key=HISTORY_TABLE,
+                          row_height=35,
+                          tooltip='Purchase History',
+                          enable_events=True),
+                 ]
+            ], visible=(len(history)) > 0)
+        ],
+    ]
 
 
 def item_purchase_popup(product, item, update_search_table, update_stock_levels, update_purchase_history):
@@ -252,7 +299,8 @@ def customer_screen():
     def update_purchase_history():
         nonlocal history
         history = get_purchase_history(user.id)
-        window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history])
+        window[NO_PAST_PURCHASE_TEXT].update(visible=False)
+        window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history], visible=True)
 
     search_layout = search_tab_screen(table_data)
 
@@ -315,6 +363,21 @@ def customer_screen():
         elif event == HISTORY_TABLE:
             index = values[HISTORY_TABLE][0]
             item = history[index]
-            window[HISTORY_ITEM_TITLE_TEXT].update(f'Item ID: {item["id"]}')
+            item = get_item_information(item['id'])
+            window[HISTORY_ITEM_TITLE_TEXT].update(visible=False)
+            window[HISTORY_TABLE_KEY].update(visible=True)
+            window[HISTORY_TABLE_VALUE].update(visible=True)
+            window[ITEM_ID_TEXT].update(f'{item["id"]}')
+            window[ITEM_CATEGORY_TEXT].update(f'{item["category"]}')
+            window[ITEM_MODEL_TEXT].update(f'{item["model"]}')
+            window[ITEM_PRICE_TEXT].update(f'{item["price"]}')
+            window[ITEM_COLOR_TEXT].update(f'{item["colour"]}')
+            window[ITEM_POWER_SUPPLY_TEXT].update(f'{item["power_supply"]}')
+            window[ITEM_FACTORY_TEXT].update(f'{item["factory"]}')
+            window[ITEM_PRODUCTION_YEAR_TEXT].update(f'{item["production_year"]}')
+            window[ITEM_WARRANTY_TEXT].update(f'{item["warranty"]}')
+            window[ITEM_SERVICE_STATUS_TEXT].update(f'{item["service_status"]}')
+            window[ITEM_SERVICED_BY_TEXT].update(f'{item["name"]}')
+            window[ITEM_PURCHASE_DATE_TEXT].update(f'{item["purchase_date"]}')
 
     window.close()
