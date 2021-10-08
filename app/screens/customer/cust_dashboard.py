@@ -13,8 +13,8 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    get_purchase_history_by_id, get_item_information_by_id, set_request_status_by_id, get_request_status, \
-    find_service_requests_by_id_and_status
+    get_purchase_history_by_id, get_item_information_by_id, insert_request_by_id, get_request_status, \
+    find_service_requests_by_id_and_status, find_request_by_id, update_request_status_by_id
 from app.models.request import RequestStatus
 from app.utils import setup_window
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
@@ -58,7 +58,26 @@ SEARCH_TABLE_HEADERS = [
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 HISTORY_TABLE_HEADERS = ['IID', 'Model', 'Purchase Date']
-REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount', 'Payment Date', 'Request Status', 'Request Date', 'Serviced By']
+REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'Serviced By']
+
+
+def make_payment_popup(request_id, update_service_requests):
+    user_id = get_current_user().id
+    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
+        [sg.Text(f'Making payment for Request ID: {request_id}')],
+    ])
+    window = setup_window('Make Payment', layout)
+    while True:
+        event, values = window.read()
+        if event in ['Cancel', sg.WIN_CLOSED]:
+            break
+
+        elif event == 'Confirm':
+            update_request_status_by_id(request_id, RequestStatus.InProgress.value)
+            update_service_requests()
+            break
+
+    window.close()
 
 
 def request_servicing_popup(item, update_purchase_history, update_service_requests):
@@ -74,7 +93,7 @@ def request_servicing_popup(item, update_purchase_history, update_service_reques
 
         elif event == 'Confirm':
             request_status, service_amount = get_request_status(item)
-            set_request_status_by_id(item, user_id, request_status, 'Waiting for approval', service_amount)
+            insert_request_by_id(item, user_id, request_status, 'Waiting for approval', service_amount)
             update_purchase_history()
             update_service_requests()
             break
@@ -353,6 +372,7 @@ def home_tab_screen():
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
+    pending_table_data, requests_table_data = get_requests_table_data()
     history = get_purchase_history_by_id(user.id)
     is_after_reset = True
 
@@ -383,6 +403,7 @@ def customer_screen():
         window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history], visible=True)
 
     def update_service_requests():
+        nonlocal pending_table_data, requests_table_data
         pending_table_data, requests_table_data = get_requests_table_data()
         window[PENDING_REQUESTS_TABLE].update(values=pending_table_data)
         window[SERVICE_REQUESTS_TABLE].update(values=requests_table_data)
@@ -471,5 +492,10 @@ def customer_screen():
             item = history[index]
             item = get_item_information_by_id(item['id'])
             request_servicing_popup(item, update_purchase_history, update_service_requests)
+
+        elif event == PENDING_REQUESTS_TABLE:
+            index = values[PENDING_REQUESTS_TABLE][0]
+            request = pending_table_data[index]
+            make_payment_popup(request[0], update_service_requests)
 
     window.close()

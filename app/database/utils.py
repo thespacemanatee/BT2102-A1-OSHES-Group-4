@@ -293,8 +293,18 @@ def get_item_information_by_id(item_id):
     return result
 
 
-def set_request_status_by_id(item, customer_id, request_status, service_status, service_amount):
-    service_payment_date = date.today() + timedelta(days=10)
+def find_request_by_id(request_id):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('SELECT * FROM request WHERE id = %s', (request_id,))
+        result = cursor.fetchone()
+        cursor.close()
+
+    return Request(result[0], result[1], result[2], result[3], result[4], result[5], result[6])
+
+
+def insert_request_by_id(item, customer_id, request_status, service_status, service_amount):
+    service_payment_date = date.today() + timedelta(days=10) if service_amount > 0 else None
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item['id']))
@@ -302,6 +312,14 @@ def set_request_status_by_id(item, customer_id, request_status, service_status, 
             'INSERT INTO request (service_amount, service_payment_date, request_status, request_date, customer_id) '
             'VALUES (%s, %s, %s, %s, %s)',
             (service_amount, service_payment_date, request_status, date.today(), customer_id))
+        mysql_client.commit()
+        cursor.close()
+
+
+def update_request_status_by_id(request_id, request_status):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE request SET request_status = %s WHERE id = %s', (request_status, request_id))
         mysql_client.commit()
         cursor.close()
 
