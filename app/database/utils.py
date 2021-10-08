@@ -305,14 +305,14 @@ def set_request_status_by_id(item, customer_id, request_status, service_status, 
         cursor.close()
 
 
-def get_request_status(item) -> Tuple[str, int]:
+def get_request_status(item) -> Tuple[str, float]:
     if date.today() - item['purchase_date'] > timedelta(days=item['warranty'] * 30):
         return 'Submitted and Waiting for payment', 40 + 0.2 * item['cost']
-    return 'Submitted', 0
+    return 'Submitted', 0.00
 
 
 def find_service_requests_by_id_and_status(customer_id, request_status):
-    with mysql_client.cursor() as cursor:
+    with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('SELECT * FROM request WHERE customer_id = %s AND request_status = %s',
                        (customer_id, request_status))

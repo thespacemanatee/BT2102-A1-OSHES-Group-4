@@ -1,8 +1,11 @@
-DROP DATABASE IF EXISTS `db.OSHES`;
+DROP
+DATABASE IF EXISTS `db.OSHES`;
 
-CREATE DATABASE IF NOT EXISTS `db.OSHES`;
+CREATE
+DATABASE IF NOT EXISTS `db.OSHES`;
 
-USE `db.OSHES`;
+USE
+`db.OSHES`;
 
 CREATE TABLE `customer`
 (
@@ -11,7 +14,7 @@ CREATE TABLE `customer`
     `gender`   varchar(50) NOT NULL,
     `email`    varchar(50) NOT NULL,
     `address`  varchar(50) NOT NULL,
-    `phone`    int(20)     NOT NULL,
+    `phone`    int(20) NOT NULL,
     `password` varchar(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
@@ -21,7 +24,7 @@ CREATE TABLE `administrator`
     `id`       varchar(50) NOT NULL,
     `name`     varchar(50) NOT NULL,
     `gender`   varchar(50) NOT NULL,
-    `phone`    int(20)     NOT NULL,
+    `phone`    int(20) NOT NULL,
     `password` varchar(50) NOT NULL,
     PRIMARY KEY (`id`)
 );
@@ -29,11 +32,11 @@ CREATE TABLE `administrator`
 CREATE TABLE `request`
 (
     `id`                   int         NOT NULL AUTO_INCREMENT,
-    `service_amount`       decimal(10, 2) DEFAULT NULL,
+    `service_amount`       decimal(10, 2) DEFAULT 0.00,
     `service_payment_date` date           DEFAULT NULL,
     `request_status`       varchar(50) NOT NULL,
     `request_date`         date        NOT NULL,
-    `customer_id`          varchar(50)    DEFAULT NULL,
+    `customer_id`          varchar(50) NOT NULL,
     `admin_id`             varchar(50)    DEFAULT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
