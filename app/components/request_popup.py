@@ -10,7 +10,6 @@ SERVICING_COMPLETED_BUTTON = 'servicing_completed_button'
 
 
 def request_popup(request, callbacks=None):
-    user_id = get_current_user().id
     if callbacks is None:
         callbacks = []
     layout = centered_component(top_children=[
@@ -50,7 +49,6 @@ def request_popup(request, callbacks=None):
 
         elif event == SERVICING_COMPLETED_BUTTON:
             update_request_status_by_id(request.request_id, RequestStatus.Completed.value)
-            update_request_admin_by_id(request.request_id, user_id)
             for callback in callbacks:
                 callback()
             break
