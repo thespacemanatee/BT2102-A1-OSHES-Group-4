@@ -201,15 +201,15 @@ def administrator_screen():
         nonlocal pending_requests_data
         pending_requests_data = find_service_requests_by_status(
             (RequestStatus.Submitted.value, RequestStatus.InProgress.value,))
-        window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data))
+        window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data, admin=True))
 
     def update_service_requests():
         nonlocal ongoing_requests_data, completed_requests_data
         ongoing_requests_data = find_service_requests_by_status(
             (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value))
         completed_requests_data = find_service_requests_by_status((RequestStatus.Completed.value,))
-        window[ONGOING_REQUESTS_TABLE].update(values=get_requests_table_data(ongoing_requests_data))
-        window[COMPLETED_REQUESTS_TABLE].update(values=get_requests_table_data(completed_requests_data))
+        window[ONGOING_REQUESTS_TABLE].update(values=get_requests_table_data(ongoing_requests_data, admin=True))
+        window[COMPLETED_REQUESTS_TABLE].update(values=get_requests_table_data(completed_requests_data, admin=True))
 
     home_layout = home_tab_screen(stock_levels_data, pending_requests_data)
 

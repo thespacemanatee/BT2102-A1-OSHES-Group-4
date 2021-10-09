@@ -1,14 +1,18 @@
 import PySimpleGUI as sg
 
+from app.auth import get_current_user
 from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
-from app.database.utils import update_request_status_by_id
+from app.database.utils import update_request_status_by_id, update_request_admin_by_id
 from app.models.request import RequestStatus
 from app.utils import setup_window
 
 SERVICING_COMPLETED_BUTTON = 'servicing_completed_button'
 
 
-def request_popup(request, callbacks=[]):
+def request_popup(request, callbacks=None):
+    user_id = get_current_user().id
+    if callbacks is None:
+        callbacks = []
     layout = centered_component(top_children=[
         sg.Column([
             [sg.Text('Item ID:')],
@@ -46,6 +50,7 @@ def request_popup(request, callbacks=[]):
 
         elif event == SERVICING_COMPLETED_BUTTON:
             update_request_status_by_id(request.request_id, RequestStatus.Completed.value)
+            update_request_admin_by_id(request.request_id, user_id)
             for callback in callbacks:
                 callback()
             break

@@ -317,6 +317,14 @@ def insert_request_by_id(item, customer_id, request_status, service_status, serv
         cursor.close()
 
 
+def update_request_admin_by_id(request_id, admin_id):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE request SET admin_id = %s WHERE id = %s', (admin_id, request_id))
+        mysql_client.commit()
+        cursor.close()
+
+
 def update_request_status_by_id(request_id, request_status):
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
