@@ -65,7 +65,7 @@ def make_payment_popup(request_id, update_service_requests):
     layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
         [sg.Text(f'Making payment for Request ID: {request_id}')],
     ])
-    window = setup_window('Make Payment', layout)
+    window = setup_window('Make Payment', layout, keep_on_top=True)
     while True:
         event, values = window.read()
         if event in ['Cancel', sg.WIN_CLOSED]:
@@ -84,7 +84,7 @@ def request_servicing_popup(item, update_purchase_history, update_service_reques
     layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
         [sg.Text(f'Request servicing for Item ID: {item["id"]}?')],
     ])
-    window = setup_window('Request for Servicing', layout)
+    window = setup_window('Request for Servicing', layout, keep_on_top=True)
     while True:
         event, values = window.read()
         if event in ['Cancel', sg.WIN_CLOSED]:
@@ -260,7 +260,7 @@ def item_purchase_window(item_list, update_search_table, update_purchase_history
                                 )]
                       ], centered_children=[sg.Button('Done', size=10)])
 
-    window = setup_window('Purchase an Item', layout)
+    window = setup_window('Purchase an Item', layout, keep_on_top=True)
 
     while True:
         event, values = window.read()
@@ -455,44 +455,56 @@ def customer_screen():
             window[SEARCH_TABLE].update(values=table_data)
 
         elif event == SEARCH_TABLE:
-            index = values[SEARCH_TABLE][0]
-            item_list = item_data[index]
-            if len(item_list) > 0:
-                item_purchase_window(item_list, update_search_table, update_purchase_history)
-            else:
-                sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
+            try:
+                index = values[SEARCH_TABLE][0]
+                item_list = item_data[index]
+                if len(item_list) > 0:
+                    item_purchase_window(item_list, update_search_table, update_purchase_history)
+                else:
+                    sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
+            except IndexError:
+                continue
 
         elif event == HISTORY_TABLE:
-            index = values[HISTORY_TABLE][0]
-            item = history[index]
-            item = get_item_information_by_id(item['id'])
-            if item['service_status'] in ['', 'Canceled', 'Completed']:
-                window[REQUEST_SERVICING_BUTTON].update(visible=True)
-            else:
-                window[REQUEST_SERVICING_BUTTON].update(visible=False)
-            window[HISTORY_TABLE_KEY].update(visible=True)
-            window[HISTORY_TABLE_VALUE].update(visible=True)
-            window[ITEM_ID_TEXT].update(f'{item["id"]}')
-            window[ITEM_CATEGORY_TEXT].update(f'{item["category"]}')
-            window[ITEM_MODEL_TEXT].update(f'{item["model"]}')
-            window[ITEM_PRICE_TEXT].update(f'{item["price"]}')
-            window[ITEM_COLOR_TEXT].update(f'{item["colour"]}')
-            window[ITEM_POWER_SUPPLY_TEXT].update(f'{item["power_supply"]}')
-            window[ITEM_FACTORY_TEXT].update(f'{item["factory"]}')
-            window[ITEM_PRODUCTION_YEAR_TEXT].update(f'{item["production_year"]}')
-            window[ITEM_WARRANTY_TEXT].update(f'{item["warranty"]}')
-            window[ITEM_SERVICE_STATUS_TEXT].update(f'{item["service_status"]}')
-            window[ITEM_PURCHASE_DATE_TEXT].update(f'{item["purchase_date"]}')
+            try:
+                index = values[HISTORY_TABLE][0]
+                item = history[index]
+                item = get_item_information_by_id(item['id'])
+                if item['service_status'] in ['', 'Canceled', 'Completed']:
+                    window[REQUEST_SERVICING_BUTTON].update(visible=True)
+                else:
+                    window[REQUEST_SERVICING_BUTTON].update(visible=False)
+                window[HISTORY_TABLE_KEY].update(visible=True)
+                window[HISTORY_TABLE_VALUE].update(visible=True)
+                window[ITEM_ID_TEXT].update(f'{item["id"]}')
+                window[ITEM_CATEGORY_TEXT].update(f'{item["category"]}')
+                window[ITEM_MODEL_TEXT].update(f'{item["model"]}')
+                window[ITEM_PRICE_TEXT].update(f'{item["price"]}')
+                window[ITEM_COLOR_TEXT].update(f'{item["colour"]}')
+                window[ITEM_POWER_SUPPLY_TEXT].update(f'{item["power_supply"]}')
+                window[ITEM_FACTORY_TEXT].update(f'{item["factory"]}')
+                window[ITEM_PRODUCTION_YEAR_TEXT].update(f'{item["production_year"]}')
+                window[ITEM_WARRANTY_TEXT].update(f'{item["warranty"]}')
+                window[ITEM_SERVICE_STATUS_TEXT].update(f'{item["service_status"]}')
+                window[ITEM_PURCHASE_DATE_TEXT].update(f'{item["purchase_date"]}')
+            except IndexError:
+                continue
 
         elif event == REQUEST_SERVICING_BUTTON:
-            index = values[HISTORY_TABLE][0]
-            item = history[index]
-            item = get_item_information_by_id(item['id'])
-            request_servicing_popup(item, update_purchase_history, update_service_requests)
+            try:
+                index = values[HISTORY_TABLE][0]
+                item = history[index]
+                item = get_item_information_by_id(item['id'])
+                request_servicing_popup(item, update_purchase_history, update_service_requests)
+            except IndexError:
+                continue
 
         elif event == PENDING_REQUESTS_TABLE:
-            index = values[PENDING_REQUESTS_TABLE][0]
-            request = pending_table_data[index]
-            make_payment_popup(request[0], update_service_requests)
+            try:
+                index = values[PENDING_REQUESTS_TABLE][0]
+                request = pending_table_data[index]
+                make_payment_popup(request[0], update_service_requests)
+            except IndexError:
+                continue
 
     window.close()
