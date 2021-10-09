@@ -67,7 +67,6 @@ CREATE TABLE `item`
     `service_status`  varchar(50) DEFAULT '',
     `purchase_date`   date        DEFAULT NULL,
     `customer_id`     varchar(50) DEFAULT NULL,
-    `admin_id`        varchar(50) DEFAULT NULL,
     `product_id`      int         NOT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `item_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
