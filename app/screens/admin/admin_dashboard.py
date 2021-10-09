@@ -12,6 +12,7 @@ from app.components.power_supplies_component import power_supplies_filter_compon
     POWER_SUPPLY_CHECKBOX
 from app.components.production_years_filter_component import production_years_filter_component, \
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
+from app.components.request_popup import request_popup
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_item_by_id, get_sold_and_unsold, \
@@ -20,10 +21,10 @@ from app.models.request import RequestStatus
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
 from app.utils import setup_window, get_requests_table_data
 
-PENDING_APPROVALS_TABLE = 'pending_approvals_table'
-
 REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 5, 15]
-SERVICE_REQUESTS_TABLE = 'service_requests_table'
+COMPLETED_REQUESTS_TABLE = 'completed_requests_table'
+PENDING_APPROVALS_TABLE = 'pending_approvals_table'
+ONGOING_REQUESTS_TABLE = 'ongoing_requests_table'
 STOCK_LEVELS_TABLE = 'stock_levels_table'
 STOCK_LEVELS_TABLE_HEADERS = ['IID', 'Number of "SOLD" items', 'Number of "UNSOLD" items']
 REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'CID', 'IID',
@@ -63,21 +64,37 @@ def approve_request_popup(request_id, update_pending_requests, update_service_re
     window.close()
 
 
-def servicing_tab_screen(service_requests_data):
-    service_requests_data = get_requests_table_data(service_requests_data, admin=True)
+def servicing_tab_screen(ongoing_requests_data, completed_requests_data):
+    ongoing_requests_data = get_requests_table_data(ongoing_requests_data, admin=True)
+    completed_requests_data = get_requests_table_data(completed_requests_data, admin=True)
 
     return [
-        [sg.Text('Service Requests', font=('Arial', 24))],
-        [sg.Text('Click on a request to view more details.')],
-        [sg.Table(values=service_requests_data, headings=REQUESTS_TABLE_HEADERS,
+        [sg.Text('Ongoing Service Requests', font=('Arial', 24))],
+        [sg.Text('Click on a request to complete servicing.')],
+        [sg.Table(values=ongoing_requests_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
                   col_widths=REQUESTS_TABLE_PADDING,
                   justification='right',
-                  num_rows=15,
+                  num_rows=7,
                   alternating_row_color='lightyellow',
-                  key=SERVICE_REQUESTS_TABLE,
+                  key=ONGOING_REQUESTS_TABLE,
                   row_height=35,
                   tooltip='Service Requests',
+                  enable_events=True,
+                  pad=(10, 10)
+                  )],
+        [sg.Text('Completed Service Requests', font=('Arial', 24))],
+        [sg.Text('Click on a request to view more details.')],
+        [sg.Table(values=completed_requests_data, headings=REQUESTS_TABLE_HEADERS,
+                  auto_size_columns=False,
+                  col_widths=REQUESTS_TABLE_PADDING,
+                  justification='right',
+                  num_rows=7,
+                  alternating_row_color='lightyellow',
+                  key=COMPLETED_REQUESTS_TABLE,
+                  row_height=35,
+                  tooltip='Service Requests',
+                  enable_events=True,
                   pad=(10, 10)
                   )],
     ]
@@ -160,8 +177,9 @@ def administrator_screen():
     stock_levels_data = get_sold_and_unsold()
     pending_requests_data = find_service_requests_by_status(
         (RequestStatus.Submitted.value, RequestStatus.InProgress.value,))
-    service_requests_data = find_service_requests_by_status(
-        (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value, RequestStatus.Completed.value))
+    ongoing_requests_data = find_service_requests_by_status(
+        (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value))
+    completed_requests_data = find_service_requests_by_status((RequestStatus.Completed.value,))
     is_after_reset = True
 
     def _get_filtered_results():
@@ -186,16 +204,18 @@ def administrator_screen():
         window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data))
 
     def update_service_requests():
-        nonlocal service_requests_data
-        service_requests_data = find_service_requests_by_status(
-            (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value, RequestStatus.Completed.value))
-        window[SERVICE_REQUESTS_TABLE].update(values=get_requests_table_data(service_requests_data))
+        nonlocal ongoing_requests_data, completed_requests_data
+        ongoing_requests_data = find_service_requests_by_status(
+            (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value))
+        completed_requests_data = find_service_requests_by_status((RequestStatus.Completed.value,))
+        window[ONGOING_REQUESTS_TABLE].update(values=get_requests_table_data(ongoing_requests_data))
+        window[COMPLETED_REQUESTS_TABLE].update(values=get_requests_table_data(completed_requests_data))
 
     home_layout = home_tab_screen(stock_levels_data, pending_requests_data)
 
     search_layout = search_tab_screen(table_data)
 
-    servicing_layout = servicing_tab_screen(service_requests_data)
+    servicing_layout = servicing_tab_screen(ongoing_requests_data, completed_requests_data)
 
     logout_layout = [[
         sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
@@ -260,6 +280,14 @@ def administrator_screen():
                 index = values[PENDING_APPROVALS_TABLE][0]
                 request = pending_requests_data[index]
                 approve_request_popup(request.request_id, update_pending_requests, update_service_requests)
+            except IndexError:
+                continue
+
+        elif event == ONGOING_REQUESTS_TABLE:
+            try:
+                index = values[ONGOING_REQUESTS_TABLE][0]
+                request = ongoing_requests_data[index]
+                request_popup(request, [update_service_requests])
             except IndexError:
                 continue
 
