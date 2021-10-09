@@ -31,16 +31,18 @@ CREATE TABLE `administrator`
 
 CREATE TABLE `request`
 (
-    `id`                   int         NOT NULL AUTO_INCREMENT,
-    `service_amount`       decimal(10, 2) DEFAULT 0.00,
-    `service_payment_date` date           DEFAULT NULL,
-    `request_status`       varchar(50) NOT NULL,
-    `request_date`         date        NOT NULL,
-    `customer_id`          varchar(50) NOT NULL,
-    `admin_id`             varchar(50)    DEFAULT NULL,
+    `id`                   int              NOT NULL AUTO_INCREMENT,
+    `service_amount`       decimal(10, 2)   DEFAULT 0.00,
+    `service_payment_date` date             DEFAULT NULL,
+    `request_status`       varchar(50)      NOT NULL,
+    `request_date`         date             NOT NULL,
+    `customer_id`          varchar(50)      NOT NULL,
+    `item_id`              int              NOT NULL,
+    `admin_id`             varchar(50)      DEFAULT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `request_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-    CONSTRAINT `request_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
+    CONSTRAINT `request_ibfk_2` FOREIGN KEY (`item_id`) REFERENCES `item`(`id`),
+    CONSTRAINT `request_ibfk_23` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`)
 );
 
 CREATE TABLE `product`
@@ -69,6 +71,5 @@ CREATE TABLE `item`
     `product_id`      int         NOT NULL,
     PRIMARY KEY (`id`),
     CONSTRAINT `item_ibfk_1` FOREIGN KEY (`customer_id`) REFERENCES `customer` (`id`),
-    CONSTRAINT `item_ibfk_2` FOREIGN KEY (`admin_id`) REFERENCES `administrator` (`id`),
     CONSTRAINT `item_ibfk_3` FOREIGN KEY (`product_id`) REFERENCES `product` (`id`)
 );
