@@ -105,7 +105,20 @@ def purchase_history_tab_screen(history):
     table_data = [list(item.values()) for item in history]
 
     return [
-        [
+        [sg.Column([
+            [sg.Text('Click on an item to view details.')],
+            [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
+                      auto_size_columns=False,
+                      col_widths=[5, 15, 15],
+                      justification='right',
+                      num_rows=15,
+                      alternating_row_color='lightyellow',
+                      key=HISTORY_TABLE,
+                      row_height=35,
+                      tooltip='Purchase History',
+                      enable_events=True),
+             ]
+        ], key=HISTORY_TABLE_GROUP),
             sg.Column([
                 [sg.Text('No item selected.', key=HISTORY_ITEM_TITLE_TEXT,
                          pad=((5, 0), (5, 20)))],
@@ -122,6 +135,7 @@ def purchase_history_tab_screen(history):
                     [sg.Text('Service Status:')],
                     [sg.Text('Serviced By:')],
                     [sg.Text('Purchase Date:')],
+                    [sg.Text(' ' * 35)],
                 ], key=HISTORY_TABLE_KEY, pad=((0, 10), (0, 0))),
                     sg.Column([
                         [sg.Text('', key=ITEM_ID_TEXT)],
@@ -136,25 +150,13 @@ def purchase_history_tab_screen(history):
                         [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
                         [sg.Text('', key=ITEM_SERVICED_BY_TEXT)],
                         [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
+                        [sg.Text(' ' * 35)],
                     ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
                 ],
-                [sg.Button('Request for Servicing', expand_x=True, pad=(0, 20), visible=False,
+                [sg.Button('Request for Servicing', expand_x=True, size=40, pad=(0, 20), visible=False,
                            key=REQUEST_SERVICING_BUTTON)],
             ], expand_y=True, expand_x=True, key=HISTORY_ITEM_DETAILS_COLUMN, pad=((10, 0), (0, 0))),
-            sg.Column([
-                [sg.Text('Click on an item to view details.')],
-                [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
-                          auto_size_columns=False,
-                          col_widths=[5, 15, 15],
-                          justification='right',
-                          num_rows=18,
-                          alternating_row_color='lightyellow',
-                          key=HISTORY_TABLE,
-                          row_height=35,
-                          tooltip='Purchase History',
-                          enable_events=True),
-                 ]
-            ], key=HISTORY_TABLE_GROUP)
+
         ],
     ]
 
