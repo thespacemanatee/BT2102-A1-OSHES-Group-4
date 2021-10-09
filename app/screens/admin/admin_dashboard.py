@@ -16,7 +16,9 @@ from app.components.request_popup import request_popup
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_item_by_id, get_sold_and_unsold, \
-    find_service_requests_by_status, update_request_status_by_id, update_request_admin_by_id
+    find_service_requests_by_status, update_request_status_by_id, update_request_admin_by_id, \
+    update_service_status_by_id
+from app.models.item import ServiceStatus
 from app.models.request import RequestStatus
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
 from app.utils import setup_window, get_requests_table_data
@@ -45,10 +47,10 @@ TABLE_HEADERS = [
 ]
 
 
-def approve_request_popup(request_id, update_pending_requests, update_service_requests):
+def approve_request_popup(request, update_pending_requests, update_service_requests):
     user_id = get_current_user().id
     layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
-        [sg.Text(f'Approving Request ID: {request_id}')],
+        [sg.Text(f'Approving Request ID: {request.request_id}')],
     ])
     window = setup_window('Make Payment', layout, keep_on_top=True)
     while True:
@@ -57,8 +59,9 @@ def approve_request_popup(request_id, update_pending_requests, update_service_re
             break
 
         elif event == 'Confirm':
-            update_request_status_by_id(request_id, RequestStatus.Approved.value)
-            update_request_admin_by_id(request_id, user_id)
+            update_request_status_by_id(request.request_id, RequestStatus.Approved.value)
+            update_service_status_by_id(request.item_id, ServiceStatus.InProgress.value)
+            update_request_admin_by_id(request.request_id, user_id)
             update_pending_requests()
             update_service_requests()
             break
@@ -281,7 +284,7 @@ def administrator_screen():
             try:
                 index = values[PENDING_APPROVALS_TABLE][0]
                 request = pending_requests_data[index]
-                approve_request_popup(request.request_id, update_pending_requests, update_service_requests)
+                approve_request_popup(request, update_pending_requests, update_service_requests)
             except IndexError:
                 continue
 

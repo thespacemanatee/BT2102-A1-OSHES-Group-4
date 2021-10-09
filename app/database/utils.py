@@ -369,6 +369,24 @@ def find_service_requests_by_status(request_status: Tuple[str, ...]):
     return result
 
 
+def update_service_status_by_id(item_id, service_status):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item_id))
+        mysql_client.commit()
+        cursor.close()
+
+    query = {
+        'ItemID': str(item_id)
+    }
+    new_values = {
+        '$set': {
+            'ServiceStatus': service_status
+        }
+    }
+    Items.update_one(query, new_values)
+
+
 def get_sold_and_unsold():
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
