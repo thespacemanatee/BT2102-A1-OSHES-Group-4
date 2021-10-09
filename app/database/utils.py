@@ -387,6 +387,14 @@ def update_service_status_by_id(item_id, service_status):
     Items.update_one(query, new_values)
 
 
+def cancel_requests_after_deadline():
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE request SET request_status = %s WHERE service_payment_date < CURDATE()', ('Canceled',))
+        mysql_client.commit()
+        cursor.close()
+
+
 def get_sold_and_unsold():
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
