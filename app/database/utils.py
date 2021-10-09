@@ -284,8 +284,8 @@ def get_item_information_by_id(item_id):
         cursor.execute(
             'SELECT item.id, product.category, product.model, product.price, product.cost, item.colour, '
             'item.power_supply, item.factory, item.production_year, product.warranty, item.service_status, '
-            'administrator.name, item.purchase_date FROM item INNER JOIN product ON item.product_id = product.id '
-            'LEFT JOIN administrator ON item.admin_id = administrator.id '
+            'item.purchase_date FROM item '
+            'INNER JOIN product ON item.product_id = product.id '
             'WHERE item.id = %s', (item_id,))
         result = cursor.fetchone()
         cursor.close()
@@ -309,9 +309,10 @@ def insert_request_by_id(item, customer_id, request_status, service_status, serv
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item['id']))
         cursor.execute(
-            'INSERT INTO request (service_amount, service_payment_date, request_status, request_date, customer_id) '
-            'VALUES (%s, %s, %s, %s, %s)',
-            (service_amount, service_payment_date, request_status, date.today(), customer_id))
+            'INSERT INTO request (service_amount, service_payment_date, request_status, request_date, customer_id, '
+            'item_id) '
+            'VALUES (%s, %s, %s, %s, %s, %s)',
+            (service_amount, service_payment_date, request_status, date.today(), customer_id, item['id']))
         mysql_client.commit()
         cursor.close()
 
@@ -330,7 +331,7 @@ def get_request_status(item) -> Tuple[str, float]:
     return 'Submitted', 0.00
 
 
-def find_service_requests_by_id_and_status(customer_id: int, request_status: Tuple[str, ...]):
+def find_service_requests_by_id_and_status(customer_id: str, request_status: Tuple[str, ...]):
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         placeholders = ', '.join(['%s'] * len(request_status))
@@ -338,8 +339,9 @@ def find_service_requests_by_id_and_status(customer_id: int, request_status: Tup
         params = (customer_id,) + request_status
         cursor.execute(query, params)
         result = cursor.fetchall()
-        result = [Request(request[0], request[1], request[2], request[3], request[4], request[5], request[6])
-                  for request in result]
+        result = [
+            Request(request[0], request[1], request[2], request[3], request[4], request[5], request[6], request[7])
+            for request in result]
         cursor.close()
 
     return result

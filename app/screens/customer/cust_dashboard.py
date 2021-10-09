@@ -1,7 +1,9 @@
-import PySimpleGUI as sg
 import copy
 
+import PySimpleGUI as sg
+
 from app.auth import get_current_user
+from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
@@ -14,10 +16,9 @@ from app.components.search_table_component import search_table_component, SEARCH
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
     get_purchase_history_by_id, get_item_information_by_id, insert_request_by_id, get_request_status, \
-    find_service_requests_by_id_and_status, find_request_by_id, update_request_status_by_id
+    find_service_requests_by_id_and_status, update_request_status_by_id
 from app.models.request import RequestStatus
 from app.utils import setup_window
-from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
 
 PENDING_REQUESTS_TABLE = 'pending_requests_tabel'
 SERVICE_REQUESTS_TABLE = 'service_requests_table'
@@ -34,7 +35,6 @@ ITEM_FACTORY_TEXT = 'item_factory_text'
 ITEM_PRODUCTION_YEAR_TEXT = 'item_production_year_text'
 ITEM_WARRANTY_TEXT = 'item_warranty_text'
 ITEM_SERVICE_STATUS_TEXT = 'item_service_status_text'
-ITEM_SERVICED_BY_TEXT = 'item_serviced_by_text'
 ITEM_PURCHASE_DATE_TEXT = 'item_purchase_date_text'
 
 HISTORY_TABLE_VALUE = 'history_table_value'
@@ -58,11 +58,11 @@ SEARCH_TABLE_HEADERS = [
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
 HISTORY_TABLE_HEADERS = ['IID', 'Model', 'Purchase Date']
-REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'Serviced By']
+REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'IID',
+                          'Serviced By']
 
 
 def make_payment_popup(request_id, update_service_requests):
-    user_id = get_current_user().id
     layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
         [sg.Text(f'Making payment for Request ID: {request_id}')],
     ])
@@ -133,7 +133,6 @@ def purchase_history_tab_screen(history):
                     [sg.Text('Production Year:')],
                     [sg.Text('Warranty (months)')],
                     [sg.Text('Service Status:')],
-                    [sg.Text('Serviced By:')],
                     [sg.Text('Purchase Date:')],
                     [sg.Text(' ' * 35)],
                 ], key=HISTORY_TABLE_KEY, pad=((0, 10), (0, 0))),
@@ -148,7 +147,6 @@ def purchase_history_tab_screen(history):
                         [sg.Text('', key=ITEM_PRODUCTION_YEAR_TEXT)],
                         [sg.Text('', key=ITEM_WARRANTY_TEXT)],
                         [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
-                        [sg.Text('', key=ITEM_SERVICED_BY_TEXT)],
                         [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
                         [sg.Text(' ' * 35)],
                     ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
@@ -347,7 +345,7 @@ def home_tab_screen():
         [sg.Text('Pending Payment', font=('Arial', 24))],
         [sg.Table(values=pending_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
-                  col_widths=[5, 15, 15, 15, 15, 10],
+                  col_widths=[5, 15, 15, 15, 15, 5, 10],
                   justification='right',
                   num_rows=7,
                   alternating_row_color='lightyellow',
@@ -359,7 +357,7 @@ def home_tab_screen():
         [sg.Text('Completed Service Requests', font=('Arial', 24))],
         [sg.Table(values=requests_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
-                  col_widths=[5, 15, 15, 15, 15, 10],
+                  col_widths=[5, 15, 15, 15, 15, 5, 10],
                   justification='right',
                   num_rows=7,
                   alternating_row_color='lightyellow',
@@ -486,7 +484,6 @@ def customer_screen():
             window[ITEM_PRODUCTION_YEAR_TEXT].update(f'{item["production_year"]}')
             window[ITEM_WARRANTY_TEXT].update(f'{item["warranty"]}')
             window[ITEM_SERVICE_STATUS_TEXT].update(f'{item["service_status"]}')
-            window[ITEM_SERVICED_BY_TEXT].update(f'{item["name"]}')
             window[ITEM_PURCHASE_DATE_TEXT].update(f'{item["purchase_date"]}')
 
         elif event == REQUEST_SERVICING_BUTTON:
