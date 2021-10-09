@@ -268,7 +268,7 @@ def get_purchase_history_by_id(customer_id):
     with mysql_client.cursor(dictionary=True) as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
-            'SELECT item.id, product.model, item.purchase_date FROM item '
+            'SELECT item.id, product.category, product.model, item.purchase_date FROM item '
             'INNER JOIN product ON item.product_id = product.id '
             'WHERE customer_id = %s',
             (customer_id,))

@@ -39,7 +39,6 @@ ITEM_PURCHASE_DATE_TEXT = 'item_purchase_date_text'
 
 HISTORY_TABLE_VALUE = 'history_table_value'
 HISTORY_TABLE_KEY = 'history_table_key'
-HISTORY_ITEM_TITLE_TEXT = 'history_item_title_text'
 HISTORY_ITEM_DETAILS_COLUMN = 'history_item_details_column'
 WRONG_ENTRY = 'wrong_entry'
 QUANTITY_VAL = 'quantity_val'
@@ -57,7 +56,7 @@ SEARCH_TABLE_HEADERS = [
     'Stock'
 ]
 PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
-HISTORY_TABLE_HEADERS = ['IID', 'Model', 'Purchase Date']
+HISTORY_TABLE_HEADERS = ['IID', 'Category ', 'Model', 'Purchase Date']
 REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'IID',
                           'Serviced By']
 
@@ -109,7 +108,7 @@ def purchase_history_tab_screen(history):
             [sg.Text('Click on an item to view details.')],
             [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
                       auto_size_columns=False,
-                      col_widths=[5, 15, 15],
+                      col_widths=[5, 10, 10, 15],
                       justification='right',
                       num_rows=15,
                       alternating_row_color='lightyellow',
@@ -120,8 +119,7 @@ def purchase_history_tab_screen(history):
              ]
         ], key=HISTORY_TABLE_GROUP),
             sg.Column([
-                [sg.Text('No item selected.', key=HISTORY_ITEM_TITLE_TEXT,
-                         pad=((5, 0), (5, 20)))],
+                [sg.Text('')],
                 [sg.Column([
                     [sg.Text('Item ID:')],
                     [sg.Text('Category:')],
@@ -304,9 +302,9 @@ def search_tab_screen(table_data):
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_layout = search_table_component(table_data, SEARCH_TABLE_HEADERS)
+    table_layout = search_table_component(table_data, SEARCH_TABLE_HEADERS, [5, 15, 15, 10, 15, 10])
 
-    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
+    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 0))],
             category_row,
             model_row,
             [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
@@ -343,6 +341,7 @@ def home_tab_screen():
 
     return [
         [sg.Text('Pending Payment', font=('Arial', 24))],
+        [sg.Text('Click on an item to make payment')],
         [sg.Table(values=pending_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
                   col_widths=[5, 15, 15, 15, 15, 5, 10],
@@ -354,7 +353,7 @@ def home_tab_screen():
                   tooltip='Item List',
                   enable_events=True,
                   pad=(10, 10))],
-        [sg.Text('Completed Service Requests', font=('Arial', 24))],
+        [sg.Text('Service Requests', font=('Arial', 24))],
         [sg.Table(values=requests_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
                   col_widths=[5, 15, 15, 15, 15, 5, 10],
@@ -471,7 +470,6 @@ def customer_screen():
                 window[REQUEST_SERVICING_BUTTON].update(visible=True)
             else:
                 window[REQUEST_SERVICING_BUTTON].update(visible=False)
-            window[HISTORY_ITEM_TITLE_TEXT].update(visible=False)
             window[HISTORY_TABLE_KEY].update(visible=True)
             window[HISTORY_TABLE_VALUE].update(visible=True)
             window[ITEM_ID_TEXT].update(f'{item["id"]}')

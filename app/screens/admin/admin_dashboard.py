@@ -21,7 +21,7 @@ RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
 
 TABLE_HEADERS = [
-    'Product ID',
+    'PID',
     'Category',
     'Model',
     'Cost ($)',
@@ -57,9 +57,9 @@ def search_tab_screen(table_data):
     prod = production_years if len(production_years) > 0 else ['Null']
     production_years_filter_row = production_years_filter_component(prod)
 
-    table_layout = search_table_component(table_data, TABLE_HEADERS)
+    table_layout = search_table_component(table_data, TABLE_HEADERS, [5, 15, 15, 10, 10, 15, 10, 10])
 
-    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 10))],
+    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 0))],
             category_row,
             model_row,
             item_search_component(),
