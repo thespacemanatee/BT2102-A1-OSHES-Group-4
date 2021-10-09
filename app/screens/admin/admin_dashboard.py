@@ -2,6 +2,7 @@ import PySimpleGUI as sg
 
 from app.auth import get_current_user
 from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
+from app.components.centered_component import centered_component
 from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
 from app.components.item_search_component import item_search_component, ITEM_SEARCH_VAL, ITEM_SEARCH_RADIO
@@ -14,10 +15,12 @@ from app.components.production_years_filter_component import production_years_fi
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years, get_filtered_results, find_item_by_id, get_sold_and_unsold, \
-    find_service_requests_by_status
+    find_service_requests_by_status, update_request_status_by_id
 from app.models.request import RequestStatus
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
 from app.utils import setup_window, get_requests_table_data
+
+PENDING_APPROVALS_TABLE = 'pending_approvals_table'
 
 REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 5, 15]
 SERVICE_REQUESTS_TABLE = 'service_requests_table'
@@ -41,16 +44,36 @@ TABLE_HEADERS = [
 ]
 
 
+def approve_request_popup(request_id, update_pending_requests, update_service_requests):
+    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
+        [sg.Text(f'Approving Request ID: {request_id}')],
+    ])
+    window = setup_window('Make Payment', layout, keep_on_top=True)
+    while True:
+        event, values = window.read()
+        if event in ['Cancel', sg.WIN_CLOSED]:
+            break
+
+        elif event == 'Confirm':
+            update_request_status_by_id(request_id, RequestStatus.Approved.value)
+            update_pending_requests()
+            update_service_requests()
+            break
+
+    window.close()
+
+
 def servicing_tab_screen(service_requests_data):
     service_requests_data = get_requests_table_data(service_requests_data, admin=True)
 
     return [
         [sg.Text('Service Requests', font=('Arial', 24))],
+        [sg.Text('Click on a request to view more details.')],
         [sg.Table(values=service_requests_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
                   col_widths=REQUESTS_TABLE_PADDING,
                   justification='right',
-                  num_rows=7,
+                  num_rows=15,
                   alternating_row_color='lightyellow',
                   key=SERVICE_REQUESTS_TABLE,
                   row_height=35,
@@ -115,15 +138,17 @@ def home_tab_screen(stock_levels_data, pending_requests_data):
                   pad=(10, 10)
                   )],
         [sg.Text('Pending Approval', font=('Arial', 24))],
+        [sg.Text('Click on a request to approve.')],
         [sg.Table(values=pending_requests_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
                   col_widths=REQUESTS_TABLE_PADDING,
                   justification='right',
                   num_rows=7,
                   alternating_row_color='lightyellow',
-                  key='pending_approvals_table',
+                  key=PENDING_APPROVALS_TABLE,
                   row_height=35,
                   tooltip='Pending Requests',
+                  enable_events=True,
                   pad=(10, 10)
                   )],
     ]
@@ -154,8 +179,17 @@ def administrator_screen():
             return get_filtered_results(admin=True, category=category, model=model, color=color, factory=factory,
                                         power_supply=power_supply, production_year=production_year)
 
-    def update_overview_table():
-        pass
+    def update_pending_requests():
+        nonlocal pending_requests_data
+        pending_requests_data = find_service_requests_by_status(
+            (RequestStatus.Submitted.value, RequestStatus.InProgress.value,))
+        window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data))
+
+    def update_service_requests():
+        nonlocal service_requests_data
+        service_requests_data = find_service_requests_by_status(
+            (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value, RequestStatus.Completed.value))
+        window[SERVICE_REQUESTS_TABLE].update(values=get_requests_table_data(service_requests_data))
 
     home_layout = home_tab_screen(stock_levels_data, pending_requests_data)
 
@@ -220,5 +254,13 @@ def administrator_screen():
             is_after_reset = True
             table_data, item_data = get_filtered_results(admin=True)
             window[SEARCH_TABLE].update(values=table_data)
+
+        elif event == PENDING_APPROVALS_TABLE:
+            try:
+                index = values[PENDING_APPROVALS_TABLE][0]
+                request = pending_requests_data[index]
+                approve_request_popup(request.request_id, update_pending_requests, update_service_requests)
+            except IndexError:
+                continue
 
     window.close()
