@@ -13,9 +13,18 @@ from app.components.production_years_filter_component import production_years_fi
     PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import search_table_component, SEARCH_TABLE
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results, find_item_by_id
+    get_production_years, get_filtered_results, find_item_by_id, get_sold_and_unsold, \
+    find_service_requests_by_status
+from app.models.request import RequestStatus
 from app.screens.customer.cust_dashboard import SEARCH_BUTTON
-from app.utils import setup_window
+from app.utils import setup_window, get_requests_table_data
+
+REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 5, 15]
+SERVICE_REQUESTS_TABLE = 'service_requests_table'
+STOCK_LEVELS_TABLE = 'stock_levels_table'
+STOCK_LEVELS_TABLE_HEADERS = ['IID', 'Number of "SOLD" items', 'Number of "UNSOLD" items']
+REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'CID', 'IID',
+                          'Serviced By']
 
 RESET_BUTTON = 'reset_button'
 MODEL_OPTION = 'model_option'
@@ -30,6 +39,25 @@ TABLE_HEADERS = [
     'Stock',
     'Sold'
 ]
+
+
+def servicing_tab_screen(service_requests_data):
+    service_requests_data = get_requests_table_data(service_requests_data, admin=True)
+
+    return [
+        [sg.Text('Service Requests', font=('Arial', 24))],
+        [sg.Table(values=service_requests_data, headings=REQUESTS_TABLE_HEADERS,
+                  auto_size_columns=False,
+                  col_widths=REQUESTS_TABLE_PADDING,
+                  justification='right',
+                  num_rows=7,
+                  alternating_row_color='lightyellow',
+                  key=SERVICE_REQUESTS_TABLE,
+                  row_height=35,
+                  tooltip='Service Requests',
+                  pad=(10, 10)
+                  )],
+    ]
 
 
 def search_tab_screen(table_data):
@@ -72,9 +100,43 @@ def search_tab_screen(table_data):
             ]
 
 
+def home_tab_screen(stock_levels_data, pending_requests_data):
+    stock_levels_data = [list(item.values()) for item in stock_levels_data]
+    pending_requests_data = get_requests_table_data(pending_requests_data, admin=True)
+    return [
+        [sg.Text('Overview', font=('Arial', 24))],
+        [sg.Table(values=stock_levels_data, headings=STOCK_LEVELS_TABLE_HEADERS,
+                  justification='right',
+                  num_rows=7,
+                  alternating_row_color='lightyellow',
+                  key=STOCK_LEVELS_TABLE,
+                  row_height=35,
+                  tooltip='Stock Levels',
+                  pad=(10, 10)
+                  )],
+        [sg.Text('Pending Approval', font=('Arial', 24))],
+        [sg.Table(values=pending_requests_data, headings=REQUESTS_TABLE_HEADERS,
+                  auto_size_columns=False,
+                  col_widths=REQUESTS_TABLE_PADDING,
+                  justification='right',
+                  num_rows=7,
+                  alternating_row_color='lightyellow',
+                  key='pending_approvals_table',
+                  row_height=35,
+                  tooltip='Pending Requests',
+                  pad=(10, 10)
+                  )],
+    ]
+
+
 def administrator_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
+    stock_levels_data = get_sold_and_unsold()
+    pending_requests_data = find_service_requests_by_status(
+        (RequestStatus.Submitted.value, RequestStatus.InProgress.value,))
+    service_requests_data = find_service_requests_by_status(
+        (RequestStatus.Approved.value, RequestStatus.WaitingForPayment.value, RequestStatus.Completed.value))
     is_after_reset = True
 
     def _get_filtered_results():
@@ -92,9 +154,14 @@ def administrator_screen():
             return get_filtered_results(admin=True, category=category, model=model, color=color, factory=factory,
                                         power_supply=power_supply, production_year=production_year)
 
+    def update_overview_table():
+        pass
+
+    home_layout = home_tab_screen(stock_levels_data, pending_requests_data)
+
     search_layout = search_tab_screen(table_data)
 
-    request_layout = [[sg.Text('request servicing for your purchased item here')]]
+    servicing_layout = servicing_tab_screen(service_requests_data)
 
     logout_layout = [[
         sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
@@ -104,8 +171,9 @@ def administrator_screen():
     tab_layout = [[
         logout_layout,
         sg.TabGroup([
+            [sg.Tab('         Home         ', [[sg.Column(home_layout, pad=25)]])],
             [sg.Tab('        Search        ', [[sg.Column(search_layout, pad=25)]])],
-            [sg.Tab('        Request       ', [[sg.Column(request_layout, pad=25)]])],
+            [sg.Tab('       Servicing      ', [[sg.Column(servicing_layout, pad=25)]])],
         ])]
     ]
 

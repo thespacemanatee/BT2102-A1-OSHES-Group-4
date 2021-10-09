@@ -345,3 +345,28 @@ def find_service_requests_by_id_and_status(customer_id: str, request_status: Tup
         cursor.close()
 
     return result
+
+
+def find_service_requests_by_status(request_status: Tuple[str, ...]):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        placeholders = ', '.join(['%s'] * len(request_status))
+        cursor.execute('SELECT * FROM request WHERE request_status IN ({})'.format(placeholders), request_status)
+        result = cursor.fetchall()
+        result = [
+            Request(request[0], request[1], request[2], request[3], request[4], request[5], request[6], request[7])
+            for request in result]
+        cursor.close()
+
+    return result
+
+
+def get_sold_and_unsold():
+    with mysql_client.cursor(dictionary=True) as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute(
+            "SELECT product_id, COUNT(IF(purchase_status = 'Sold', 1, NULL)), "
+            "COUNT(IF(purchase_status = 'Unsold', 1, NULL)) FROM item GROUP BY product_id")
+        result = cursor.fetchall()
+
+    return result

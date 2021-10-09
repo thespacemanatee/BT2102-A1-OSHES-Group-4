@@ -18,8 +18,9 @@ from app.database.utils import get_categories, get_models, get_colors, get_facto
     get_purchase_history_by_id, get_item_information_by_id, insert_request_by_id, get_request_status, \
     find_service_requests_by_id_and_status, update_request_status_by_id
 from app.models.request import RequestStatus
-from app.utils import setup_window
+from app.utils import setup_window, get_requests_table_data
 
+REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 15]
 PENDING_REQUESTS_TABLE = 'pending_requests_tabel'
 SERVICE_REQUESTS_TABLE = 'service_requests_table'
 REQUEST_SERVICING_BUTTON = 'request_servicing_button'
@@ -317,34 +318,25 @@ def search_tab_screen(table_data):
             ]
 
 
-def get_requests_table_data():
+def get_pending_and_requests_table_data():
     user_id = get_current_user().id
     payment_pending_requests = find_service_requests_by_id_and_status(user_id, (RequestStatus.WaitingForPayment.value,))
     service_requests = find_service_requests_by_id_and_status(user_id, (
         RequestStatus.Submitted.value, RequestStatus.InProgress.value, RequestStatus.Approved.value,
         RequestStatus.Canceled.value, RequestStatus.Completed.value))
-    pending_table_data = [request.__dict__ for request in payment_pending_requests]
-    for request in pending_table_data:
-        del request['customer_id']
-    pending_table_data = [list(request.values()) for request in pending_table_data]
 
-    requests_table_data = [request.__dict__ for request in service_requests]
-    for request in requests_table_data:
-        del request['customer_id']
-    requests_table_data = [list(request.values()) for request in requests_table_data]
-
-    return pending_table_data, requests_table_data
+    return get_requests_table_data(payment_pending_requests), get_requests_table_data(service_requests)
 
 
 def home_tab_screen():
-    pending_table_data, requests_table_data = get_requests_table_data()
+    pending_table_data, requests_table_data = get_pending_and_requests_table_data()
 
     return [
         [sg.Text('Pending Payment', font=('Arial', 24))],
         [sg.Text('Click on an item to make payment')],
         [sg.Table(values=pending_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
-                  col_widths=[5, 15, 15, 15, 15, 5, 10],
+                  col_widths=REQUESTS_TABLE_PADDING,
                   justification='right',
                   num_rows=7,
                   alternating_row_color='lightyellow',
@@ -356,7 +348,7 @@ def home_tab_screen():
         [sg.Text('Service Requests', font=('Arial', 24))],
         [sg.Table(values=requests_table_data, headings=REQUESTS_TABLE_HEADERS,
                   auto_size_columns=False,
-                  col_widths=[5, 15, 15, 15, 15, 5, 10],
+                  col_widths=REQUESTS_TABLE_PADDING,
                   justification='right',
                   num_rows=7,
                   alternating_row_color='lightyellow',
@@ -371,7 +363,7 @@ def home_tab_screen():
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
-    pending_table_data, requests_table_data = get_requests_table_data()
+    pending_table_data, requests_table_data = get_pending_and_requests_table_data()
     history = get_purchase_history_by_id(user.id)
     is_after_reset = True
 
@@ -403,7 +395,7 @@ def customer_screen():
 
     def update_service_requests():
         nonlocal pending_table_data, requests_table_data
-        pending_table_data, requests_table_data = get_requests_table_data()
+        pending_table_data, requests_table_data = get_pending_and_requests_table_data()
         window[PENDING_REQUESTS_TABLE].update(values=pending_table_data)
         window[SERVICE_REQUESTS_TABLE].update(values=requests_table_data)
 
