@@ -10,6 +10,7 @@ from app.components.item_summary_popup import item_summary_popup
 from app.components.model_component import MODEL_RADIO, MODEL_OPTION
 from app.components.power_supplies_component import POWER_SUPPLY_CHECKBOX_VAL, \
     POWER_SUPPLY_CHECKBOX
+from app.components.price_filter_component import PRICE_MIN_VAL, PRICE_CHECKBOX, PRICE_MAX_VAL
 from app.components.production_years_filter_component import PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.search_table_component import SEARCH_TABLE
 from app.components.service_request_popup import service_request_popup
@@ -18,7 +19,7 @@ from app.database.utils import get_filtered_results, find_item_by_id, get_sold_a
 from app.models.request import RequestStatus
 from app.screens.admin.home_tab_screen import home_tab_screen, COMPLETED_REQUESTS_TABLE
 from app.screens.admin.servicing_tab_screen import servicing_tab_screen, PENDING_APPROVALS_TABLE, ONGOING_REQUESTS_TABLE
-from app.screens.commons.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON
+from app.screens.commons.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON, WRONG_ENTRY
 from app.utils import setup_window, get_requests_table_data
 
 SEARCH_TABLE_COL_WIDTHS = [5, 15, 15, 10, 10, 15, 10, 10]
@@ -55,14 +56,20 @@ def administrator_screen():
             return get_filtered_results(admin=True)
 
         else:
-            category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
-            model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
-            color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
-            factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
-            power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
-            production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-            return get_filtered_results(admin=True, category=category, model=model, color=color, factory=factory,
-                                        power_supply=power_supply, production_year=production_year)
+            try:
+                category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
+                model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
+                price_min = int(values[PRICE_MIN_VAL]) if values[PRICE_CHECKBOX] else None
+                price_max = int(values[PRICE_MAX_VAL]) if values[PRICE_CHECKBOX] else None
+                color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
+                factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
+                power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
+                production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
+                return get_filtered_results(admin=True, category=category, model=model, price_min=price_min,
+                                            price_max=price_max, color=color, factory=factory,
+                                            power_supply=power_supply, production_year=production_year)
+            except ValueError:
+                window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
 
     def _update_service_requests():
         nonlocal pending_requests_data, ongoing_requests_data, completed_requests_data
@@ -121,14 +128,18 @@ def administrator_screen():
 
         elif event == SEARCH_BUTTON:
             is_after_reset = False
+            window[WRONG_ENTRY].update('')
             if values[ITEM_SEARCH_RADIO]:
                 user_input = values[ITEM_SEARCH_VAL]
                 res = find_item_by_id(user_input)
                 item_summary_popup(user_input, res)
 
             else:
-                table_data, item_data = _get_filtered_results()
-                window[SEARCH_TABLE].update(values=table_data)
+                try:
+                    table_data, item_data = _get_filtered_results()
+                    window[SEARCH_TABLE].update(values=table_data)
+                except TypeError:
+                    continue
 
         elif event == RESET_BUTTON:
             is_after_reset = True

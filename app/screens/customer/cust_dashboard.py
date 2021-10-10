@@ -9,13 +9,14 @@ from app.components.make_payment_popup import make_payment_popup
 from app.components.model_component import MODEL_RADIO, MODEL_OPTION
 from app.components.power_supplies_component import POWER_SUPPLY_CHECKBOX_VAL, \
     POWER_SUPPLY_CHECKBOX
+from app.components.price_filter_component import PRICE_MIN_VAL, PRICE_MAX_VAL, PRICE_CHECKBOX
 from app.components.production_years_filter_component import PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
 from app.components.request_servicing_popup import request_servicing_popup
 from app.components.search_table_component import SEARCH_TABLE
 from app.database.utils import get_filtered_results, get_purchase_history_by_id, get_item_information_by_id, \
     find_service_requests_by_id_and_status
 from app.models.request import RequestStatus
-from app.screens.commons.search_tab_screen import search_tab_screen, SEARCH_BUTTON, RESET_BUTTON
+from app.screens.commons.search_tab_screen import search_tab_screen, SEARCH_BUTTON, RESET_BUTTON, WRONG_ENTRY
 from app.screens.customer.home_tab_screen import home_tab_screen, PENDING_REQUESTS_TABLE, SERVICE_REQUESTS_TABLE
 from app.screens.customer.purchase_history_tab_screen import purchase_history_tab_screen, HISTORY_TABLE, \
     REQUEST_SERVICING_BUTTON, HISTORY_TABLE_VALUE, ITEM_ID_TEXT, ITEM_CATEGORY_TEXT, ITEM_MODEL_TEXT, \
@@ -57,14 +58,20 @@ def customer_screen():
             return get_filtered_results()
 
         else:
-            category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
-            model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
-            color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
-            factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
-            power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
-            production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
-            return get_filtered_results(category=category, model=model, color=color, factory=factory,
-                                        power_supply=power_supply, production_year=production_year)
+            try:
+                category = values[CATEGORY_OPTION] if values[CATEGORY_RADIO] else None
+                model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
+                price_min = int(values[PRICE_MIN_VAL]) if values[PRICE_CHECKBOX] else None
+                price_max = int(values[PRICE_MAX_VAL]) if values[PRICE_CHECKBOX] else None
+                color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
+                factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
+                power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
+                production_year = values[PRODUCTION_YEARS_CHECKBOX_VAL] if values[PRODUCTION_YEAR_CHECKBOX] else None
+                return get_filtered_results(category=category, model=model, price_min=price_min,
+                                            price_max=price_max, color=color, factory=factory,
+                                            power_supply=power_supply, production_year=production_year)
+            except ValueError:
+                window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
 
     def _update_search_table():
         nonlocal table_data, item_data
@@ -122,8 +129,12 @@ def customer_screen():
 
         elif event == SEARCH_BUTTON:
             is_after_reset = False
-            table_data, item_data = _get_filtered_results()
-            window[SEARCH_TABLE].update(values=table_data)
+            window[WRONG_ENTRY].update('')
+            try:
+                table_data, item_data = _get_filtered_results()
+                window[SEARCH_TABLE].update(values=table_data)
+            except TypeError:
+                continue
 
         elif event == RESET_BUTTON:
             is_after_reset = True

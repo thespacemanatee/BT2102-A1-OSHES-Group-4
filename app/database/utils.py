@@ -170,7 +170,7 @@ def get_production_years():
     return list(Items.find().distinct('ProductionYear'))
 
 
-def get_filtered_results(admin=False, category=None, model=None,
+def get_filtered_results(admin=False, category=None, model=None, price_min=None, price_max=None,
                          color=None, factory=None, power_supply=None, production_year=None):
     filter_by = {}
     if admin:
@@ -181,6 +181,8 @@ def get_filtered_results(admin=False, category=None, model=None,
         filter_by['Category'] = category
     elif model:
         filter_by['Model'] = model
+    if price_min is not None and price_max is not None:
+        filter_by['Price ($)'] = {'$gte': price_min, '$lte': price_max}
 
     res = Products.find(filter_by, projection)
     final_items = []

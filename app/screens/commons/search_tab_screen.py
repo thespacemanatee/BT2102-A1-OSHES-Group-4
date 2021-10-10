@@ -6,11 +6,13 @@ from app.components.factory_component import factories_filter_component
 from app.components.item_search_component import item_search_component
 from app.components.model_component import model_component
 from app.components.power_supplies_component import power_supplies_filter_component
+from app.components.price_filter_component import price_filter_component
 from app.components.production_years_filter_component import production_years_filter_component
 from app.components.search_table_component import search_table_component
 from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
     get_production_years
 
+WRONG_ENTRY = 'wrong_entry'
 RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 
@@ -23,6 +25,8 @@ def search_tab_screen(table_data, table_headers, col_widths, admin=False):
     models = get_models()
     mod = models if len(models) > 0 else ['Null']
     model_row = model_component(mod)
+
+    price_filter_row = price_filter_component()
 
     colors = get_colors()
     col = colors if len(colors) > 0 else ['Null']
@@ -47,10 +51,11 @@ def search_tab_screen(table_data, table_headers, col_widths, admin=False):
             model_row,
             item_search_component() if admin else [],
             [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
-            [colors_filter_row, factories_filter_row],
+            [price_filter_row, colors_filter_row, factories_filter_row],
             [power_supplies_filter_row, production_years_filter_row],
             [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
              sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
+            [sg.Text('', key=WRONG_ENTRY)],
             [sg.Text('Click on a product to view available items.')] if not admin else [],
             table_layout
             ]
