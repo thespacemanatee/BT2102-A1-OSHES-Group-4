@@ -32,7 +32,7 @@ def purchase_history_tab_screen(history):
             [base_table_component(values=table_data, headings=HISTORY_TABLE_HEADERS,
                                   key=HISTORY_TABLE,
                                   col_widths=[5, 10, 10, 15],
-                                  num_rows=15,
+                                  num_rows=17,
                                   tooltip='Purchase History',
                                   ),
              ]
@@ -52,7 +52,7 @@ def purchase_history_tab_screen(history):
                     [sg.Text('Service Status:')],
                     [sg.Text('Purchase Date:')],
                     [sg.Text(' ' * 42)],
-                ], pad=((0, 10), (0, 0))),
+                ], expand_y=True, pad=((0, 10), (0, 0))),
                     sg.Column([
                         [sg.Text('', key=ITEM_ID_TEXT)],
                         [sg.Text('', key=ITEM_CATEGORY_TEXT)],
@@ -66,7 +66,8 @@ def purchase_history_tab_screen(history):
                         [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
                         [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
                         [sg.Text(' ' * 42)],
-                    ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
+                    ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True,
+                        expand_y=True),
                 ],
                 [sg.Button('Request for Servicing', expand_x=True, size=40, pad=(0, 20), visible=False,
                            key=REQUEST_SERVICING_BUTTON)],

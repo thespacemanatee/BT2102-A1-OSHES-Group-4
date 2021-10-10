@@ -53,9 +53,9 @@ def search_tab_screen(table_data, table_headers, col_widths, admin=False):
             [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
             [price_filter_row, colors_filter_row, factories_filter_row],
             [power_supplies_filter_row, production_years_filter_row],
-            [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
-             sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
-            [sg.Text('', key=WRONG_ENTRY)],
+            [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=((5, 5), (25, 0))),
+             sg.Button('Reset', key=RESET_BUTTON, size=10, pad=((5, 5), (25, 0)))],
+            [sg.Text('', key=WRONG_ENTRY, pad=((5, 5), (0, 25)))],
             [sg.Text('Click on a product to view available items.')] if not admin else [],
             table_layout
             ]

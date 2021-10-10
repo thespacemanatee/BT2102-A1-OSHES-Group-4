@@ -34,16 +34,16 @@ def item_purchase_window(item_list, callbacks=None):
         window[PURCHASE_TABLE].update(values=table_data)
 
     layout = centered_component(
-        top_children=[[sg.Text(f"Product: {product['Category']}; Model: {product['Model']}")],
-                      [sg.Text('Click on an item to purchase.')],
-                      [base_table_component(values=table_data, headings=PURCHASE_TABLE_HEADERS,
-                                            key=PURCHASE_TABLE,
-                                            auto_size_columns=True,
-                                            num_rows=10,
-                                            tooltip='Item List',
-                                            pad=(10, 10)
-                                            )]
-                      ], centered_children=[sg.Button('Done', size=10)])
+        top_children=[
+            [sg.Text('Click on an item to purchase.')],
+            [base_table_component(values=table_data, headings=PURCHASE_TABLE_HEADERS,
+                                  key=PURCHASE_TABLE,
+                                  auto_size_columns=True,
+                                  num_rows=10,
+                                  tooltip='Item List',
+                                  pad=(10, 10)
+                                  )]
+        ], centered_children=[sg.Button('Done', size=10)])
 
     window = setup_window('Purchase an Item', layout, keep_on_top=True)
 
