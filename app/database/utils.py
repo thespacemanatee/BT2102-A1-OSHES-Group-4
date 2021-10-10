@@ -270,7 +270,8 @@ def get_purchase_history_by_id(customer_id):
         cursor.execute(
             'SELECT item.id, product.category, product.model, item.purchase_date FROM item '
             'INNER JOIN product ON item.product_id = product.id '
-            'WHERE customer_id = %s',
+            'WHERE customer_id = %s '
+            'ORDER BY purchase_date DESC',
             (customer_id,))
         result = cursor.fetchall()
         cursor.close()
