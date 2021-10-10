@@ -131,9 +131,14 @@ def administrator_screen():
             window[WRONG_ENTRY].update('')
             if values[ITEM_SEARCH_RADIO]:
                 user_input = values[ITEM_SEARCH_VAL]
+                if user_input == "":
+                    window[WRONG_ENTRY].update('Please enter an Item ID', text_color='red')
+                    continue
                 res = find_item_by_id(user_input)
-                item_summary_popup(user_input, res)
-
+                if res is not None:
+                    item_summary_popup(user_input, res)
+                else:
+                    window[WRONG_ENTRY].update(f'Item ID: {user_input} does not exist.', text_color='red')
             else:
                 try:
                     table_data, item_data = _get_filtered_results()
