@@ -8,4 +8,5 @@ def search_table_component(table_data, table_headers, padding):
                                  key=SEARCH_TABLE,
                                  col_widths=padding,
                                  tooltip='Search Results',
+                                 pad=(10, 10)
                                  )]

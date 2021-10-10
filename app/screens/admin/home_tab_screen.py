@@ -13,7 +13,7 @@ REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request 
 
 def home_tab_screen(stock_levels_data, completed_requests_data):
     stock_levels_data = [list(item.values()) for item in stock_levels_data]
-    completed_requests_data = get_requests_table_data(completed_requests_data)
+    completed_requests_data = get_requests_table_data(completed_requests_data, admin=True)
 
     return [
         [sg.Text('Overview', font=('Arial', 24))],

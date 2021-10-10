@@ -34,6 +34,7 @@ def purchase_history_tab_screen(history):
                                   col_widths=[5, 10, 10, 15],
                                   num_rows=17,
                                   tooltip='Purchase History',
+                                  pad=(10, 10)
                                   ),
              ]
         ], key=HISTORY_TABLE_GROUP),

@@ -8,12 +8,12 @@ class Request:
                  item_id, admin_id):
         self.request_id: int = request_id
         self.service_amount: float = service_amount
-        self.service_payment_date: datetime.date = service_payment_date
+        self.service_payment_date: Union[datetime.date, None] = service_payment_date if service_payment_date else '-'
         self.request_status: RequestStatus = request_status
         self.request_date: datetime.date = request_date
         self.customer_id: str = customer_id
         self.item_id: int = item_id
-        self.admin_id: Union[str, None] = admin_id
+        self.admin_id: Union[str, None] = admin_id if admin_id else '-'
 
 
 class RequestStatus(enum.Enum):

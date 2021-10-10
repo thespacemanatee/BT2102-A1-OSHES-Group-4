@@ -11,8 +11,8 @@ REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request 
 
 
 def servicing_tab_screen(ongoing_requests_data, pending_requests_data):
-    ongoing_requests_data = get_requests_table_data(ongoing_requests_data)
-    pending_requests_data = get_requests_table_data(pending_requests_data)
+    ongoing_requests_data = get_requests_table_data(ongoing_requests_data, admin=True)
+    pending_requests_data = get_requests_table_data(pending_requests_data, admin=True)
 
     return [
         [sg.Text('Ongoing Service Requests', font=('Arial', 24))],
