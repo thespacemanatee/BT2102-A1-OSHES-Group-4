@@ -2,7 +2,6 @@ import PySimpleGUI as sg
 
 from app.auth import get_current_user
 from app.components.approve_request_popup import approve_request_popup
-from app.components.base_table_component import base_table_component
 from app.components.category_component import CATEGORY_RADIO, CATEGORY_OPTION
 from app.components.color_component import COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
@@ -18,8 +17,8 @@ from app.database.utils import get_filtered_results, find_item_by_id, get_sold_a
     find_service_requests_by_status
 from app.models.request import RequestStatus
 from app.screens.admin.home_tab_screen import home_tab_screen, COMPLETED_REQUESTS_TABLE
-from app.screens.admin.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON
 from app.screens.admin.servicing_tab_screen import servicing_tab_screen, PENDING_APPROVALS_TABLE, ONGOING_REQUESTS_TABLE
+from app.screens.commons.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON
 from app.utils import setup_window, get_requests_table_data
 
 SEARCH_TABLE_HEADERS = [
@@ -36,7 +35,7 @@ SEARCH_TABLE_HEADERS = [
 SEARCH_TABLE_COL_WIDTHS = [5, 15, 15, 10, 10, 15, 10, 10]
 
 
-def get_service_requests_table_data():
+def get_service_requests_data():
     pending_requests_data = find_service_requests_by_status(
         (RequestStatus.Submitted.value, RequestStatus.InProgress.value, RequestStatus.WaitingForPayment.value))
     ongoing_requests_data = find_service_requests_by_status((RequestStatus.Approved.value,))
@@ -48,7 +47,7 @@ def administrator_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
     stock_levels_data = get_sold_and_unsold()
-    pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_table_data()
+    pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_data()
     is_after_reset = True
 
     def _get_filtered_results():
@@ -68,14 +67,14 @@ def administrator_screen():
 
     def _update_service_requests():
         nonlocal pending_requests_data, ongoing_requests_data, completed_requests_data
-        pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_table_data()
+        pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_data()
         window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data, admin=True))
         window[ONGOING_REQUESTS_TABLE].update(values=get_requests_table_data(ongoing_requests_data, admin=True))
         window[COMPLETED_REQUESTS_TABLE].update(values=get_requests_table_data(completed_requests_data, admin=True))
 
     home_layout = home_tab_screen(stock_levels_data, completed_requests_data)
 
-    search_layout = search_tab_screen(table_data, SEARCH_TABLE_HEADERS, SEARCH_TABLE_COL_WIDTHS)
+    search_layout = search_tab_screen(table_data, SEARCH_TABLE_HEADERS, SEARCH_TABLE_COL_WIDTHS, admin=True)
 
     servicing_layout = servicing_tab_screen(ongoing_requests_data, pending_requests_data)
 

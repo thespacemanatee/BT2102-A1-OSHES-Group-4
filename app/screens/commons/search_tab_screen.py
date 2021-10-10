@@ -15,7 +15,7 @@ RESET_BUTTON = 'reset_button'
 SEARCH_BUTTON = 'search_button'
 
 
-def search_tab_screen(table_data, table_headers, col_widths):
+def search_tab_screen(table_data, table_headers, col_widths, admin=False):
     categories = get_categories()
     cat = categories if len(categories) > 0 else ['Null']
     category_row = category_component(cat)
@@ -45,11 +45,12 @@ def search_tab_screen(table_data, table_headers, col_widths):
     return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 0))],
             category_row,
             model_row,
-            item_search_component(),
+            item_search_component() if admin else [],
             [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
             [colors_filter_row, factories_filter_row],
             [power_supplies_filter_row, production_years_filter_row],
             [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
              sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
+            [sg.Text('Click on a product to view available items.')] if not admin else [],
             table_layout
             ]

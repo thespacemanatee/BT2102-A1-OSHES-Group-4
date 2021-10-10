@@ -1,53 +1,29 @@
-import copy
-
 import PySimpleGUI as sg
 
 from app.auth import get_current_user
-from app.components.category_component import category_component, CATEGORY_RADIO, CATEGORY_OPTION
-from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
-from app.components.color_component import colors_filter_component, COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
-from app.components.factory_component import factories_filter_component, FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
-from app.components.model_component import model_component, MODEL_RADIO, MODEL_OPTION
-from app.components.power_supplies_component import power_supplies_filter_component, POWER_SUPPLY_CHECKBOX_VAL, \
+from app.components.category_component import CATEGORY_RADIO, CATEGORY_OPTION
+from app.components.color_component import COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
+from app.components.factory_component import FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
+from app.components.item_purchase_window import item_purchase_window
+from app.components.make_payment_popup import make_payment_popup
+from app.components.model_component import MODEL_RADIO, MODEL_OPTION
+from app.components.power_supplies_component import POWER_SUPPLY_CHECKBOX_VAL, \
     POWER_SUPPLY_CHECKBOX
-from app.components.production_years_filter_component import production_years_filter_component, \
-    PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
-from app.components.search_table_component import search_table_component, SEARCH_TABLE
-from app.database.utils import get_categories, get_models, get_colors, get_factories, get_power_supplies, \
-    get_production_years, get_filtered_results, find_product_by_category_and_model, purchase_item, get_stock_levels, \
-    get_purchase_history_by_id, get_item_information_by_id, insert_request_by_id, get_request_status, \
-    find_service_requests_by_id_and_status, update_request_status_by_id
+from app.components.production_years_filter_component import PRODUCTION_YEARS_CHECKBOX_VAL, PRODUCTION_YEAR_CHECKBOX
+from app.components.request_servicing_popup import request_servicing_popup
+from app.components.search_table_component import SEARCH_TABLE
+from app.database.utils import get_filtered_results, get_purchase_history_by_id, get_item_information_by_id, \
+    find_service_requests_by_id_and_status
 from app.models.request import RequestStatus
+from app.screens.commons.search_tab_screen import search_tab_screen, SEARCH_BUTTON, RESET_BUTTON
+from app.screens.customer.home_tab_screen import home_tab_screen, PENDING_REQUESTS_TABLE, SERVICE_REQUESTS_TABLE
+from app.screens.customer.purchase_history_tab_screen import purchase_history_tab_screen, HISTORY_TABLE, \
+    REQUEST_SERVICING_BUTTON, HISTORY_TABLE_VALUE, ITEM_ID_TEXT, ITEM_CATEGORY_TEXT, ITEM_MODEL_TEXT, \
+    ITEM_PRICE_TEXT, ITEM_COLOR_TEXT, ITEM_POWER_SUPPLY_TEXT, ITEM_FACTORY_TEXT, ITEM_PRODUCTION_YEAR_TEXT, \
+    ITEM_WARRANTY_TEXT, ITEM_SERVICE_STATUS_TEXT, ITEM_PURCHASE_DATE_TEXT
 from app.utils import setup_window, get_requests_table_data
 
-REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 15]
-PENDING_REQUESTS_TABLE = 'pending_requests_tabel'
-SERVICE_REQUESTS_TABLE = 'service_requests_table'
-REQUEST_SERVICING_BUTTON = 'request_servicing_button'
-HISTORY_TABLE_GROUP = 'history_table_group'
-
-ITEM_ID_TEXT = 'item_id_text'
-ITEM_CATEGORY_TEXT = 'item_category_text'
-ITEM_MODEL_TEXT = 'item_model_text'
-ITEM_PRICE_TEXT = 'item_price_text'
-ITEM_COLOR_TEXT = 'item_color_text'
-ITEM_POWER_SUPPLY_TEXT = 'item_power_supply_text'
-ITEM_FACTORY_TEXT = 'item_factory_text'
-ITEM_PRODUCTION_YEAR_TEXT = 'item_production_year_text'
-ITEM_WARRANTY_TEXT = 'item_warranty_text'
-ITEM_SERVICE_STATUS_TEXT = 'item_service_status_text'
-ITEM_PURCHASE_DATE_TEXT = 'item_purchase_date_text'
-
-HISTORY_TABLE_VALUE = 'history_table_value'
-HISTORY_TABLE_KEY = 'history_table_key'
-HISTORY_ITEM_DETAILS_COLUMN = 'history_item_details_column'
-WRONG_ENTRY = 'wrong_entry'
-QUANTITY_VAL = 'quantity_val'
-RESET_BUTTON = 'reset_button'
-SEARCH_BUTTON = 'search_button'
-PURCHASE_TABLE = 'purchase_table'
-HISTORY_TABLE = 'history_table'
-
+SEARCH_TABLE_COL_WIDTHS = [5, 15, 15, 10, 15, 10]
 SEARCH_TABLE_HEADERS = [
     'PID',
     'Category',
@@ -56,322 +32,22 @@ SEARCH_TABLE_HEADERS = [
     'Warranty (months)',
     'Stock'
 ]
-PURCHASE_TABLE_HEADERS = ['Category', 'Model', 'Color', 'Factory', 'Power Supply', 'Production Year', 'Stock']
-HISTORY_TABLE_HEADERS = ['IID', 'Category ', 'Model', 'Purchase Date']
-REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'IID',
-                          'Serviced By']
 
 
-def make_payment_popup(request_id, update_service_requests):
-    layout = centered_component(
-        [sg.Button('Confirm Payment'), sg.Button('Cancel Request', button_color='red'),
-         sg.Button('Cancel', button_color='grey')],
-        top_children=[
-            [sg.Text(f'Making payment for Request ID: {request_id}', expand_x=True, justification='center')],
-        ])
-    window = setup_window('Make Payment', layout, keep_on_top=True)
-    while True:
-        event, values = window.read()
-        if event in ['Cancel', sg.WIN_CLOSED]:
-            break
-
-        elif event == 'Cancel Request':
-            update_request_status_by_id(request_id, RequestStatus.Canceled.value)
-            update_service_requests()
-            break
-
-        elif event == 'Confirm':
-            update_request_status_by_id(request_id, RequestStatus.InProgress.value)
-            update_service_requests()
-            break
-
-    window.close()
-
-
-def request_servicing_popup(item, update_purchase_history, update_service_requests):
-    user_id = get_current_user().id
-    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel', button_color='grey')], top_children=[
-        [sg.Text(f'Request servicing for Item ID: {item["id"]}?')],
-    ])
-    window = setup_window('Request for Servicing', layout, keep_on_top=True)
-    while True:
-        event, values = window.read()
-        if event in ['Cancel', sg.WIN_CLOSED]:
-            break
-
-        elif event == 'Confirm':
-            request_status, service_amount = get_request_status(item)
-            insert_request_by_id(item, user_id, request_status, 'Waiting for approval', service_amount)
-            update_purchase_history()
-            update_service_requests()
-            break
-
-    window.close()
-
-
-def purchase_history_tab_screen(history):
-    table_data = [list(item.values()) for item in history]
-
-    return [
-        [sg.Column([
-            [sg.Text('Click on an item to view details.')],
-            [sg.Table(values=table_data, headings=HISTORY_TABLE_HEADERS,
-                      auto_size_columns=False,
-                      col_widths=[5, 10, 10, 15],
-                      justification='right',
-                      num_rows=15,
-                      alternating_row_color='lightyellow',
-                      key=HISTORY_TABLE,
-                      row_height=35,
-                      tooltip='Purchase History',
-                      enable_events=True),
-             ]
-        ], key=HISTORY_TABLE_GROUP),
-            sg.Column([
-                [sg.Text('')],
-                [sg.Column([
-                    [sg.Text('Item ID:')],
-                    [sg.Text('Category:')],
-                    [sg.Text('Model:')],
-                    [sg.Text('Price ($):')],
-                    [sg.Text('Color:')],
-                    [sg.Text('Power Supply:')],
-                    [sg.Text('Factory:')],
-                    [sg.Text('Production Year:')],
-                    [sg.Text('Warranty (months)')],
-                    [sg.Text('Service Status:')],
-                    [sg.Text('Purchase Date:')],
-                    [sg.Text(' ' * 42)],
-                ], key=HISTORY_TABLE_KEY, pad=((0, 10), (0, 0))),
-                    sg.Column([
-                        [sg.Text('', key=ITEM_ID_TEXT)],
-                        [sg.Text('', key=ITEM_CATEGORY_TEXT)],
-                        [sg.Text('', key=ITEM_MODEL_TEXT)],
-                        [sg.Text('', key=ITEM_PRICE_TEXT)],
-                        [sg.Text('', key=ITEM_COLOR_TEXT)],
-                        [sg.Text('', key=ITEM_POWER_SUPPLY_TEXT)],
-                        [sg.Text('', key=ITEM_FACTORY_TEXT)],
-                        [sg.Text('', key=ITEM_PRODUCTION_YEAR_TEXT)],
-                        [sg.Text('', key=ITEM_WARRANTY_TEXT)],
-                        [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
-                        [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
-                        [sg.Text(' ' * 42)],
-                    ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
-                ],
-                [sg.Button('Request for Servicing', expand_x=True, size=40, pad=(0, 20), visible=False,
-                           key=REQUEST_SERVICING_BUTTON)],
-            ], expand_y=True, expand_x=True, key=HISTORY_ITEM_DETAILS_COLUMN, pad=((10, 0), (0, 0))),
-
-        ],
-    ]
-
-
-def item_purchase_popup(product, item, update_search_table, update_stock_levels, update_purchase_history):
-    user = get_current_user()
-    layout = centered_component(top_children=[
-        sg.Column([
-            [sg.Text('Category:')],
-            [sg.Text('Model:')],
-            [sg.Text('Color:')],
-            [sg.Text('Factory:')],
-            [sg.Text('Power Supply:')],
-            [sg.Text('Production Year:')],
-            [sg.Text('Price ($):')],
-            [sg.Text('Warranty (months)')],
-        ],
-            pad=20
-        ), sg.Column([
-            [sg.Text(product["Category"])],
-            [sg.Text(product["Model"])],
-            [sg.Text(item["Color"])],
-            [sg.Text(item["Factory"])],
-            [sg.Text(item["PowerSupply"])],
-            [sg.Text(item["ProductionYear"])],
-            [sg.Text(product["Price ($)"])],
-            [sg.Text(product["Warranty (months)"])],
-        ],
-            element_justification='right',
-            pad=20
-        )
-    ], centered_children=[sg.Column([[sg.Text(f'Quantity: ({item["Stock"]} left)'), sg.Input(k=QUANTITY_VAL, s=9)],
-                                     [sg.Text(k=WRONG_ENTRY)],
-                                     [sg.Column([[
-                                         sg.Button('Purchase', s=10), sg.Button('Cancel', s=10, button_color='grey')]
-                                     ])]
-                                     ]),
-                          ])
-
-    popup = setup_window('Confirm Purchase', layout, keep_on_top=True)
-    popup[COLUMN].expand(True, True, True)
-    popup[EXPAND_1].expand(True, True, True)
-    popup[EXPAND_2].expand(True, False, True)
-
-    while True:
-        event, values = popup.read()
-        if event in ('Cancel', sg.WIN_CLOSED):
-            break
-
-        elif event == 'Purchase':
-            try:
-                quantity = int(values[QUANTITY_VAL])
-                if quantity > item['Stock']:
-                    popup[WRONG_ENTRY].update('Quantity exceeded.', text_color='red')
-
-                else:
-                    purchase_item(user.id, {
-                        'Category': item['Category'],
-                        'Model': item['Model'],
-                        'Color': item['Color'],
-                        'Factory': item['Factory'],
-                        'PowerSupply': item['PowerSupply'],
-                        'ProductionYear': item['ProductionYear'],
-                    }, int(values[QUANTITY_VAL]))
-                    update_search_table()
-                    update_stock_levels()
-                    update_purchase_history()
-                    popup.close()
-                    break
-            except ValueError:
-                popup[WRONG_ENTRY].update('Please enter a number.', text_color='red')
-
-    popup.close()
-
-
-def setup_purchase_table(item_list):
-    item_list_copy = copy.deepcopy(item_list)
-    counts = get_stock_levels(item_list_copy)
-    for j in range(len(item_list_copy)):
-        item_list_copy[j]['Stock'] = counts[j]
-    return item_list_copy, [list(item.values()) for item in item_list_copy]
-
-
-def item_purchase_window(item_list, update_search_table, update_purchase_history):
-    item_list_copy, table_data = setup_purchase_table(item_list)
-    product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
-
-    def update_stock_levels():
-        nonlocal item_list_copy, table_data
-        item_list_copy, table_data = setup_purchase_table(item_list)
-        window[PURCHASE_TABLE].update(values=table_data)
-
-    layout = centered_component(
-        top_children=[[sg.Text(f"Product: {product['Category']}; Model: {product['Model']}")],
-                      [sg.Text('Click on an item to purchase.')],
-                      [sg.Table(values=table_data, headings=PURCHASE_TABLE_HEADERS,
-                                justification='right',
-                                num_rows=10,
-                                alternating_row_color='lightyellow',
-                                key=PURCHASE_TABLE,
-                                row_height=35,
-                                tooltip='Item List',
-                                enable_events=True,
-                                pad=(10, 10)
-                                )]
-                      ], centered_children=[sg.Button('Done', size=10)])
-
-    window = setup_window('Purchase an Item', layout, keep_on_top=True)
-
-    while True:
-        event, values = window.read()
-        if event in ('Done', sg.WIN_CLOSED):
-            break
-
-        if event == PURCHASE_TABLE:
-            try:
-                item = item_list_copy[values[PURCHASE_TABLE][0]]
-                item_purchase_popup(product, item, update_search_table, update_stock_levels, update_purchase_history)
-            except IndexError:
-                continue
-
-    window.close()
-
-
-def search_tab_screen(table_data):
-    categories = get_categories()
-    cat = categories if len(categories) > 0 else ['Null']
-    category_row = category_component(cat)
-
-    models = get_models()
-    mod = models if len(models) > 0 else ['Null']
-    model_row = model_component(mod)
-
-    colors = get_colors()
-    col = colors if len(colors) > 0 else ['Null']
-    colors_filter_row = colors_filter_component(col)
-
-    factories = get_factories()
-    fac = factories if len(factories) > 0 else ['Null']
-    factories_filter_row = factories_filter_component(fac)
-
-    power_supplies = get_power_supplies()
-    pow_sup = power_supplies if len(power_supplies) > 0 else ['Null']
-    power_supplies_filter_row = power_supplies_filter_component(pow_sup)
-
-    production_years = get_production_years()
-    prod = production_years if len(production_years) > 0 else ['Null']
-    production_years_filter_row = production_years_filter_component(prod)
-
-    table_layout = search_table_component(table_data, SEARCH_TABLE_HEADERS, [5, 15, 15, 10, 15, 10])
-
-    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 0))],
-            category_row,
-            model_row,
-            [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
-            [colors_filter_row, factories_filter_row],
-            [power_supplies_filter_row, production_years_filter_row],
-            [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=(5, 25)),
-             sg.Button('Reset', key=RESET_BUTTON, size=10, pad=(5, 25))],
-            [sg.Text('Click on a product to view available items.')],
-            table_layout
-            ]
-
-
-def get_pending_and_requests_table_data():
+def get_service_requests_data():
     user_id = get_current_user().id
     payment_pending_requests = find_service_requests_by_id_and_status(user_id, (RequestStatus.WaitingForPayment.value,))
     service_requests = find_service_requests_by_id_and_status(user_id, (
         RequestStatus.Submitted.value, RequestStatus.InProgress.value, RequestStatus.Approved.value,
         RequestStatus.Canceled.value, RequestStatus.Completed.value))
 
-    return get_requests_table_data(payment_pending_requests), get_requests_table_data(service_requests)
-
-
-def home_tab_screen():
-    pending_table_data, requests_table_data = get_pending_and_requests_table_data()
-
-    return [
-        [sg.Text('Pending Payment', font=('Arial', 24))],
-        [sg.Text('Click on an item to make payment')],
-        [sg.Table(values=pending_table_data, headings=REQUESTS_TABLE_HEADERS,
-                  auto_size_columns=False,
-                  col_widths=REQUESTS_TABLE_PADDING,
-                  justification='right',
-                  num_rows=7,
-                  alternating_row_color='lightyellow',
-                  key=PENDING_REQUESTS_TABLE,
-                  row_height=35,
-                  tooltip='Item List',
-                  enable_events=True,
-                  pad=(10, 10))],
-        [sg.Text('Service Requests', font=('Arial', 24))],
-        [sg.Table(values=requests_table_data, headings=REQUESTS_TABLE_HEADERS,
-                  auto_size_columns=False,
-                  col_widths=REQUESTS_TABLE_PADDING,
-                  justification='right',
-                  num_rows=7,
-                  alternating_row_color='lightyellow',
-                  key=SERVICE_REQUESTS_TABLE,
-                  row_height=35,
-                  tooltip='Item List',
-                  enable_events=True,
-                  pad=(10, 10))]
-    ]
+    return payment_pending_requests, service_requests
 
 
 def customer_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results()
-    pending_table_data, requests_table_data = get_pending_and_requests_table_data()
+    pending_table_data, requests_table_data = get_service_requests_data()
     history = get_purchase_history_by_id(user.id)
     is_after_reset = True
 
@@ -390,26 +66,26 @@ def customer_screen():
             return get_filtered_results(category=category, model=model, color=color, factory=factory,
                                         power_supply=power_supply, production_year=production_year)
 
-    def update_search_table():
+    def _update_search_table():
         nonlocal table_data, item_data
         table_data, item_data = _get_filtered_results()
         window[SEARCH_TABLE].update(values=table_data)
 
-    def update_purchase_history():
+    def _update_purchase_history():
         nonlocal history
         history = get_purchase_history_by_id(user.id)
         window[REQUEST_SERVICING_BUTTON].update(visible=False)
         window[HISTORY_TABLE].update(values=[list(item1.values()) for item1 in history], visible=True)
 
-    def update_service_requests():
+    def _update_service_requests():
         nonlocal pending_table_data, requests_table_data
-        pending_table_data, requests_table_data = get_pending_and_requests_table_data()
-        window[PENDING_REQUESTS_TABLE].update(values=pending_table_data)
-        window[SERVICE_REQUESTS_TABLE].update(values=requests_table_data)
+        pending_table_data, requests_table_data = get_service_requests_data()
+        window[PENDING_REQUESTS_TABLE].update(values=get_requests_table_data(pending_table_data))
+        window[SERVICE_REQUESTS_TABLE].update(values=get_requests_table_data(requests_table_data))
 
-    home_layout = home_tab_screen()
+    home_layout = home_tab_screen(pending_table_data, requests_table_data)
 
-    search_layout = search_tab_screen(table_data)
+    search_layout = search_tab_screen(table_data, SEARCH_TABLE_HEADERS, SEARCH_TABLE_COL_WIDTHS)
 
     request_layout = purchase_history_tab_screen(history)
 
@@ -459,7 +135,7 @@ def customer_screen():
                 index = values[SEARCH_TABLE][0]
                 item_list = item_data[index]
                 if len(item_list) > 0:
-                    item_purchase_window(item_list, update_search_table, update_purchase_history)
+                    item_purchase_window(item_list, _update_search_table, _update_purchase_history)
                 else:
                     sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
             except IndexError:
@@ -474,7 +150,6 @@ def customer_screen():
                     window[REQUEST_SERVICING_BUTTON].update(visible=True)
                 else:
                     window[REQUEST_SERVICING_BUTTON].update(visible=False)
-                window[HISTORY_TABLE_KEY].update(visible=True)
                 window[HISTORY_TABLE_VALUE].update(visible=True)
                 window[ITEM_ID_TEXT].update(f'{item["id"]}')
                 window[ITEM_CATEGORY_TEXT].update(f'{item["category"]}')
@@ -495,7 +170,7 @@ def customer_screen():
                 index = values[HISTORY_TABLE][0]
                 item = history[index]
                 item = get_item_information_by_id(item['id'])
-                request_servicing_popup(item, update_purchase_history, update_service_requests)
+                request_servicing_popup(item, [_update_purchase_history, _update_service_requests])
             except IndexError:
                 continue
 
@@ -503,7 +178,7 @@ def customer_screen():
             try:
                 index = values[PENDING_REQUESTS_TABLE][0]
                 request = pending_table_data[index]
-                make_payment_popup(request[0], update_service_requests)
+                make_payment_popup(request.request_id, [_update_service_requests])
             except IndexError:
                 continue
 
