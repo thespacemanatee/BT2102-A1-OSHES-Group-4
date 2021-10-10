@@ -7,7 +7,7 @@ from app.screens.admin.admin_login import administrator_login_screen
 from app.screens.customer.cust_login import customer_login_screen
 from app.utils import setup_window
 
-INTRO_WINDOW_SIZE = (800, 700)
+INTRO_WINDOW_SIZE = (1080, 720)
 
 
 def intro_screen():
