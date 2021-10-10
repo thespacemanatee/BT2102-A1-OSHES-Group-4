@@ -12,7 +12,6 @@ WRONG_ENTRY = 'wrong_entry'
 
 
 def customer_login_screen(intro_window):
-    # customer login window
     layout = [
         [sg.Column(
             [[sg.Text('Customer ID:')],
@@ -39,14 +38,13 @@ def customer_login_screen(intro_window):
             customer_register_screen(intro_window)
             break
 
-        # check customer ID and password against database
         elif event == 'Login':
-            valid, cust_id, name, gender, email, address, phone = validate_customer_login(values[ID_VAL],
-                                                                                           values[PASSWORD_VAL])
-            if valid:
+            customer = validate_customer_login(values[ID_VAL],
+                                               values[PASSWORD_VAL])
+            if customer:
                 intro_window.close()
                 window.close()
-                set_current_user(Customer(cust_id, name, gender, email, address, phone))
+                set_current_user(customer)
                 customer_screen()
                 break
             else:

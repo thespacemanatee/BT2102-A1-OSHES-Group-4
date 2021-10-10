@@ -30,8 +30,8 @@ SEARCH_TABLE_HEADERS = [
     'Cost ($)',
     'Price ($)',
     'Warranty (months)',
+    'Sold',
     'Stock',
-    'Sold'
 ]
 
 

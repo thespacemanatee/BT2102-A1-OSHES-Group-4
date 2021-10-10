@@ -3,6 +3,8 @@ from datetime import date, timedelta
 from typing import Tuple
 
 from app.database.setup import mysql_client, Products, Items
+from app.models.administrator import Admin
+from app.models.customer import Customer
 from app.models.request import Request
 
 
@@ -95,10 +97,7 @@ def validate_administrator_login(username, password):
         results = cursor.fetchone()
         cursor.close()
 
-    if results is None:
-        return False, "", "", "", ""
-
-    return True, results[0], results[1], results[2], results[3]
+    return Admin(results[0], results[1], results[2], results[3]) if results else None
 
 
 def validate_customer_login(username, password):
@@ -108,10 +107,7 @@ def validate_customer_login(username, password):
         results = cursor.fetchone()
         cursor.close()
 
-    if results is None:
-        return False, "", "", "", "", "", ""
-
-    return True, results[0], results[1], results[2], results[3], results[4], results[5]
+    return Customer(results[0], results[1], results[2], results[3], results[4], results[5]) if results else None
 
 
 def purchase_item(customer_id, item, quantity: int):
@@ -228,9 +224,9 @@ def get_filtered_results(admin=False, category=None, model=None, price_min=None,
         temp_items = [i for n, i in enumerate(temp_items) if i not in temp_items[n + 1:]]
         final_items.append(temp_items)
         temp = list(product.values())
-        temp.append(len(unsold_items))
         if admin:
             temp.append(len(sold_items))
+        temp.append(len(unsold_items))
         final_values.append(temp)
 
     return final_values, final_items
@@ -243,6 +239,7 @@ def get_stock_levels(unsold_items):
         temp_item['PurchaseStatus'] = 'Unsold'
         count = len(list(Items.find(temp_item)))
         counts.append(count)
+
     return counts
 
 
@@ -253,6 +250,7 @@ def find_product_by_category_and_model(category, model):
 def find_item_by_id(item_id):
     item = Items.find_one({'ItemID': item_id})
     product = find_product_by_category_and_model(item['Category'], item['Model'])
+
     return {**item, **product}
 
 

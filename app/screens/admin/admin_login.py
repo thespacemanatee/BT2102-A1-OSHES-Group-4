@@ -38,13 +38,12 @@ def administrator_login_screen(intro_window):
             administrator_register_screen(intro_window)
             break
 
-        # check admin ID and password against database
         elif event == 'Login':
-            valid, admin_id, name, gender, phone = validate_administrator_login(values[ID_VAL], values[PASSWORD_VAL])
-            if valid:
+            administrator = validate_administrator_login(values[ID_VAL], values[PASSWORD_VAL])
+            if administrator:
                 intro_window.close()
                 window.close()
-                set_current_user(Admin(admin_id, name, gender, phone))
+                set_current_user(administrator)
                 administrator_screen()
                 break
             else:
