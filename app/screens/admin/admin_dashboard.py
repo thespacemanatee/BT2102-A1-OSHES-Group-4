@@ -158,7 +158,8 @@ def administrator_screen():
             try:
                 index = values[ONGOING_REQUESTS_TABLE][0]
                 request = ongoing_requests_data[index]
-                service_request_popup(request, [_update_service_requests])
+                if user.id == request.admin_id:
+                    service_request_popup(request, [_update_service_requests])
             except IndexError:
                 continue
 
