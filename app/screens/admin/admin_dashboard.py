@@ -21,6 +21,7 @@ from app.screens.admin.servicing_tab_screen import servicing_tab_screen, PENDING
 from app.screens.commons.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON
 from app.utils import setup_window, get_requests_table_data
 
+SEARCH_TABLE_COL_WIDTHS = [5, 15, 15, 10, 10, 15, 10, 10]
 SEARCH_TABLE_HEADERS = [
     'PID',
     'Category',
@@ -31,8 +32,6 @@ SEARCH_TABLE_HEADERS = [
     'Stock',
     'Sold'
 ]
-
-SEARCH_TABLE_COL_WIDTHS = [5, 15, 15, 10, 10, 15, 10, 10]
 
 
 def get_service_requests_data():

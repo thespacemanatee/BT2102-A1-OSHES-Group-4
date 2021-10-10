@@ -135,7 +135,7 @@ def customer_screen():
                 index = values[SEARCH_TABLE][0]
                 item_list = item_data[index]
                 if len(item_list) > 0:
-                    item_purchase_window(item_list, _update_search_table, _update_purchase_history)
+                    item_purchase_window(item_list, [_update_search_table, _update_purchase_history])
                 else:
                     sg.popup(f'Product ID: {table_data[index][0]} is out of stock', custom_text="That's unfortunate...")
             except IndexError:

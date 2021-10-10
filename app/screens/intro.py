@@ -1,10 +1,10 @@
 import PySimpleGUI as sg
 
 from app.components.centered_component import centered_component, COLUMN, EXPAND_1, EXPAND_2
+from app.constants import ASCII_LOGO
 from app.database.utils import cancel_requests_after_deadline
 from app.screens.admin.admin_login import administrator_login_screen
 from app.screens.customer.cust_login import customer_login_screen
-from app.constants import ASCII_LOGO
 from app.utils import setup_window
 
 INTRO_WINDOW_SIZE = (800, 700)

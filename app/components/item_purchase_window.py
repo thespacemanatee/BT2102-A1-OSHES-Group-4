@@ -22,7 +22,9 @@ def setup_purchase_table(item_list):
     return item_list_copy, [list(item.values()) for item in item_list_copy]
 
 
-def item_purchase_window(item_list, update_search_table, update_purchase_history):
+def item_purchase_window(item_list, callbacks=None):
+    if callbacks is None:
+        callbacks = []
     item_list, table_data = setup_purchase_table(item_list)
     product = find_product_by_category_and_model(item_list[0]['Category'], item_list[0]['Model'])
 
@@ -53,7 +55,8 @@ def item_purchase_window(item_list, update_search_table, update_purchase_history
         if event == PURCHASE_TABLE:
             try:
                 item = item_list[values[PURCHASE_TABLE][0]]
-                item_purchase_popup(product, item, [update_search_table, update_stock_levels, update_purchase_history])
+                callbacks.append(update_stock_levels)
+                item_purchase_popup(product, item, callbacks=callbacks)
             except IndexError:
                 continue
 

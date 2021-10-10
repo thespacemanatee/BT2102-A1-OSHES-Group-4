@@ -1,5 +1,3 @@
-import PySimpleGUI as sg
-
 from app.components.base_table_component import base_table_component
 
 SEARCH_TABLE = '-SEARCH-TABLE-'

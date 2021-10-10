@@ -1,5 +1,5 @@
-from pymongo import MongoClient
 import mysql.connector
+from pymongo import MongoClient
 
 MONGODB_URL = 'mongodb://localhost:27017'
 
