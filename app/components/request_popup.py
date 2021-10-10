@@ -38,7 +38,7 @@ def request_popup(request, callbacks=None):
         )
     ], centered_children=[sg.Button('Servicing Completed', key=SERVICING_COMPLETED_BUTTON,
                                     visible=True if request.request_status == RequestStatus.Approved.value else False),
-                          sg.Cancel(s=10)])
+                          sg.Cancel(s=10, button_color='grey')])
 
     popup = setup_window(f'Request ID: {request.request_id}', layout, keep_on_top=True)
 

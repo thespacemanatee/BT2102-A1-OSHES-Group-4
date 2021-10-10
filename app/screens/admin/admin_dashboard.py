@@ -49,7 +49,7 @@ TABLE_HEADERS = [
 
 def approve_request_popup(request, update_pending_requests, update_service_requests):
     user_id = get_current_user().id
-    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
+    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel', button_color='grey')], top_children=[
         [sg.Text(f'Approving Request ID: {request.request_id}')],
     ])
     window = setup_window('Make Payment', layout, keep_on_top=True)
@@ -223,7 +223,7 @@ def administrator_screen():
     servicing_layout = servicing_tab_screen(ongoing_requests_data, completed_requests_data)
 
     logout_layout = [[
-        sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
+        sg.Text(f'Welcome, {user.name}.', font=('Arial', 28)),
         sg.Button('Log Out'),
     ]]
 

@@ -1,7 +1,5 @@
 import PySimpleGUI as sg
 
-window_size = (800, 700)
-
 
 def setup_window(title: str, layout, size=None, keep_on_top=False):
     """

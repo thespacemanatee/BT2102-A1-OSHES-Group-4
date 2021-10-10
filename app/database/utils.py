@@ -1,9 +1,9 @@
-from datetime import date, timedelta
 import json
+from datetime import date, timedelta
 from typing import Tuple
 
 from app.database.setup import mysql_client, Products, Items
-from app.models.request import Request, RequestStatus
+from app.models.request import Request
 
 
 def initialise_mysql_database():

@@ -63,13 +63,21 @@ REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request 
 
 
 def make_payment_popup(request_id, update_service_requests):
-    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
-        [sg.Text(f'Making payment for Request ID: {request_id}')],
-    ])
+    layout = centered_component(
+        [sg.Button('Confirm Payment'), sg.Button('Cancel Request', button_color='red'),
+         sg.Button('Cancel', button_color='grey')],
+        top_children=[
+            [sg.Text(f'Making payment for Request ID: {request_id}', expand_x=True, justification='center')],
+        ])
     window = setup_window('Make Payment', layout, keep_on_top=True)
     while True:
         event, values = window.read()
         if event in ['Cancel', sg.WIN_CLOSED]:
+            break
+
+        elif event == 'Cancel Request':
+            update_request_status_by_id(request_id, RequestStatus.Canceled.value)
+            update_service_requests()
             break
 
         elif event == 'Confirm':
@@ -82,7 +90,7 @@ def make_payment_popup(request_id, update_service_requests):
 
 def request_servicing_popup(item, update_purchase_history, update_service_requests):
     user_id = get_current_user().id
-    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel')], top_children=[
+    layout = centered_component([sg.Button('Confirm'), sg.Button('Cancel', button_color='grey')], top_children=[
         [sg.Text(f'Request servicing for Item ID: {item["id"]}?')],
     ])
     window = setup_window('Request for Servicing', layout, keep_on_top=True)
@@ -133,7 +141,7 @@ def purchase_history_tab_screen(history):
                     [sg.Text('Warranty (months)')],
                     [sg.Text('Service Status:')],
                     [sg.Text('Purchase Date:')],
-                    [sg.Text(' ' * 35)],
+                    [sg.Text(' ' * 42)],
                 ], key=HISTORY_TABLE_KEY, pad=((0, 10), (0, 0))),
                     sg.Column([
                         [sg.Text('', key=ITEM_ID_TEXT)],
@@ -147,7 +155,7 @@ def purchase_history_tab_screen(history):
                         [sg.Text('', key=ITEM_WARRANTY_TEXT)],
                         [sg.Text('', key=ITEM_SERVICE_STATUS_TEXT)],
                         [sg.Text('', key=ITEM_PURCHASE_DATE_TEXT)],
-                        [sg.Text(' ' * 35)],
+                        [sg.Text(' ' * 42)],
                     ], element_justification='right', visible=False, key=HISTORY_TABLE_VALUE, expand_x=True),
                 ],
                 [sg.Button('Request for Servicing', expand_x=True, size=40, pad=(0, 20), visible=False,
@@ -188,7 +196,7 @@ def item_purchase_popup(product, item, update_search_table, update_stock_levels,
     ], centered_children=[sg.Column([[sg.Text(f'Quantity: ({item["Stock"]} left)'), sg.Input(k=QUANTITY_VAL, s=9)],
                                      [sg.Text(k=WRONG_ENTRY)],
                                      [sg.Column([[
-                                         sg.Button('Purchase', s=10), sg.Button('Cancel', s=10)]
+                                         sg.Button('Purchase', s=10), sg.Button('Cancel', s=10, button_color='grey')]
                                      ])]
                                      ]),
                           ])
@@ -406,7 +414,7 @@ def customer_screen():
     request_layout = purchase_history_tab_screen(history)
 
     logout_layout = [[
-        sg.Text(f'Welcome, {user.name}.', font=('Arial', 24)),
+        sg.Text(f'Welcome, {user.name}.', font=('Arial', 28)),
         sg.Button('Log Out'),
     ]]
 
