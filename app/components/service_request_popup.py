@@ -15,7 +15,7 @@ def service_request_popup(request, callbacks=None):
                                     [sg.Text(f'Complete Servicing for Request ID: {request.request_id}')],
                                 ])
 
-    popup = setup_window(f'Request ID: {request.request_id}', layout, keep_on_top=True)
+    popup = setup_window('Complete Servicing', layout, keep_on_top=True)
 
     while True:
         event, values = popup.read()

@@ -18,7 +18,7 @@ from app.database.utils import get_filtered_results, find_item_by_id, get_sold_a
     find_service_requests_by_status
 from app.models.request import RequestStatus
 from app.screens.admin.home_tab_screen import home_tab_screen, COMPLETED_REQUESTS_TABLE
-from app.screens.admin.servicing_tab_screen import servicing_tab_screen, PENDING_APPROVALS_TABLE, ONGOING_REQUESTS_TABLE
+from app.screens.admin.servicing_tab_screen import servicing_tab_screen, WAITING_PAYMENT_TABLE, UNDER_SERVICE_TABLE
 from app.screens.commons.search_tab_screen import search_tab_screen, RESET_BUTTON, SEARCH_BUTTON, WRONG_ENTRY
 from app.utils import setup_window, get_requests_table_data
 
@@ -36,18 +36,18 @@ SEARCH_TABLE_HEADERS = [
 
 
 def get_service_requests_data():
-    pending_requests_data = find_service_requests_by_status(
-        (RequestStatus.Submitted.value, RequestStatus.InProgress.value, RequestStatus.WaitingForPayment.value))
-    ongoing_requests_data = find_service_requests_by_status((RequestStatus.Approved.value,))
+    under_service_data = find_service_requests_by_status(
+        (RequestStatus.Submitted.value, RequestStatus.InProgress.value, RequestStatus.Approved.value))
+    waiting_payment_data = find_service_requests_by_status((RequestStatus.WaitingForPayment.value,))
     completed_requests_data = find_service_requests_by_status((RequestStatus.Completed.value,))
-    return pending_requests_data, ongoing_requests_data, completed_requests_data
+    return under_service_data, waiting_payment_data, completed_requests_data
 
 
 def administrator_screen():
     user = get_current_user()
     table_data, item_data = get_filtered_results(admin=True)
     stock_levels_data = get_sold_and_unsold()
-    pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_data()
+    under_service_data, waiting_payment_data, completed_requests_data = get_service_requests_data()
     is_after_reset = True
 
     def _get_filtered_results():
@@ -72,17 +72,17 @@ def administrator_screen():
                 window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
 
     def _update_service_requests():
-        nonlocal pending_requests_data, ongoing_requests_data, completed_requests_data
-        pending_requests_data, ongoing_requests_data, completed_requests_data = get_service_requests_data()
-        window[PENDING_APPROVALS_TABLE].update(values=get_requests_table_data(pending_requests_data, admin=True))
-        window[ONGOING_REQUESTS_TABLE].update(values=get_requests_table_data(ongoing_requests_data, admin=True))
+        nonlocal under_service_data, waiting_payment_data, completed_requests_data
+        under_service_data, waiting_payment_data, completed_requests_data = get_service_requests_data()
+        window[UNDER_SERVICE_TABLE].update(values=get_requests_table_data(under_service_data, admin=True))
+        window[WAITING_PAYMENT_TABLE].update(values=get_requests_table_data(waiting_payment_data, admin=True))
         window[COMPLETED_REQUESTS_TABLE].update(values=get_requests_table_data(completed_requests_data, admin=True))
 
     home_layout = home_tab_screen(stock_levels_data, completed_requests_data)
 
     search_layout = search_tab_screen(table_data, SEARCH_TABLE_HEADERS, SEARCH_TABLE_COL_WIDTHS, admin=True)
 
-    servicing_layout = servicing_tab_screen(ongoing_requests_data, pending_requests_data)
+    servicing_layout = servicing_tab_screen(under_service_data, waiting_payment_data)
 
     logout_layout = [[
         sg.Text(f'Welcome, {user.name}.', font=('Arial', 28)),
@@ -151,20 +151,15 @@ def administrator_screen():
             table_data, item_data = get_filtered_results(admin=True)
             window[SEARCH_TABLE].update(values=table_data)
 
-        elif event == PENDING_APPROVALS_TABLE:
+        elif event == UNDER_SERVICE_TABLE:
             try:
-                index = values[PENDING_APPROVALS_TABLE][0]
-                request = pending_requests_data[index]
-                approve_request_popup(request, [_update_service_requests])
-            except IndexError:
-                continue
-
-        elif event == ONGOING_REQUESTS_TABLE:
-            try:
-                index = values[ONGOING_REQUESTS_TABLE][0]
-                request = ongoing_requests_data[index]
-                if user.id == request.admin_id:
-                    service_request_popup(request, [_update_service_requests])
+                index = values[UNDER_SERVICE_TABLE][0]
+                request = under_service_data[index]
+                callbacks = [_update_service_requests]
+                if request.request_status in [RequestStatus.Submitted.value, RequestStatus.InProgress.value]:
+                    approve_request_popup(request, callbacks)
+                elif user.id == request.admin_id:
+                    service_request_popup(request, callbacks)
             except IndexError:
                 continue
 

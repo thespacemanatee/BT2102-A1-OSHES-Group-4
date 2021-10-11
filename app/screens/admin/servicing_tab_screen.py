@@ -4,31 +4,30 @@ from app.components.base_table_component import base_table_component
 from app.utils import get_requests_table_data
 
 REQUESTS_TABLE_PADDING = [5, 15, 15, 15, 15, 5, 5, 15]
-ONGOING_REQUESTS_TABLE = 'ongoing_requests_table'
-PENDING_APPROVALS_TABLE = 'pending_approvals_table'
+UNDER_SERVICE_TABLE = 'under_service_table'
+WAITING_PAYMENT_TABLE = 'waiting_payment_table'
 REQUESTS_TABLE_HEADERS = ['RID', 'Service Amount ($)', 'Payment Date', 'Request Status', 'Request Date', 'CID', 'IID',
                           'Serviced By']
 
 
-def servicing_tab_screen(ongoing_requests_data, pending_requests_data):
-    ongoing_requests_data = get_requests_table_data(ongoing_requests_data, admin=True)
-    pending_requests_data = get_requests_table_data(pending_requests_data, admin=True)
+def servicing_tab_screen(under_service_data, waiting_payment_data):
+    under_service_data = get_requests_table_data(under_service_data, admin=True)
+    waiting_payment_data = get_requests_table_data(waiting_payment_data, admin=True)
 
     return [
-        [sg.Text('Ongoing Service Requests', font=('Arial', 24))],
-        [sg.Text('Click on a request to complete servicing.')],
-        [base_table_component(values=ongoing_requests_data, headings=REQUESTS_TABLE_HEADERS,
-                              key=ONGOING_REQUESTS_TABLE,
+        [sg.Text('Items under service', font=('Arial', 24))],
+        [sg.Text('Click on a request to view options.')],
+        [base_table_component(values=under_service_data, headings=REQUESTS_TABLE_HEADERS,
+                              key=UNDER_SERVICE_TABLE,
                               col_widths=REQUESTS_TABLE_PADDING,
-                              tooltip='Service Requests',
+                              tooltip='Items under service',
                               pad=(10, 10)
                               )],
-        [sg.Text('Pending Approval', font=('Arial', 24))],
-        [sg.Text('Click on a request to approve.')],
-        [base_table_component(values=pending_requests_data, headings=REQUESTS_TABLE_HEADERS,
-                              key=PENDING_APPROVALS_TABLE,
+        [sg.Text('Waiting for payment', font=('Arial', 24))],
+        [base_table_component(values=waiting_payment_data, headings=REQUESTS_TABLE_HEADERS,
+                              key=WAITING_PAYMENT_TABLE,
                               col_widths=REQUESTS_TABLE_PADDING,
-                              tooltip='Pending Requests',
+                              tooltip='Waiting for payment',
                               pad=(10, 10)
                               )],
     ]

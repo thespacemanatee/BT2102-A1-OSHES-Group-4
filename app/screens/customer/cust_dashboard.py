@@ -1,6 +1,7 @@
 import PySimpleGUI as sg
 
 from app.auth import get_current_user
+from app.components.cancel_request_popup import cancel_request_popup
 from app.components.category_component import CATEGORY_RADIO, CATEGORY_OPTION
 from app.components.color_component import COLOR_CHECKBOX_VAL, COLOR_CHECKBOX
 from app.components.factory_component import FACTORY_CHECKBOX_VAL, FACTORY_CHECKBOX
@@ -190,6 +191,15 @@ def customer_screen():
                 index = values[PENDING_REQUESTS_TABLE][0]
                 request = pending_table_data[index]
                 make_payment_popup(request.request_id, [_update_service_requests])
+            except IndexError:
+                continue
+
+        elif event == SERVICE_REQUESTS_TABLE:
+            try:
+                index = values[SERVICE_REQUESTS_TABLE][0]
+                request = requests_table_data[index]
+                if request.request_status == RequestStatus.Submitted.value:
+                    cancel_request_popup(request.request_id, [_update_service_requests])
             except IndexError:
                 continue
 
