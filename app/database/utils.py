@@ -401,8 +401,9 @@ def cancel_requests_after_deadline():
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute(
-            'UPDATE request SET request_status = %s WHERE DATE_ADD(request_date, INTERVAL 10 DAY) < CURDATE()',
-            ('Canceled',))
+            'UPDATE request LEFT JOIN item ON request.item_id = item.id '
+            'SET request_status = %s, service_status = %s WHERE DATE_ADD(request_date, INTERVAL 10 DAY) < CURDATE()',
+            ('Canceled', ''))
         mysql_client.commit()
         cursor.close()
 
