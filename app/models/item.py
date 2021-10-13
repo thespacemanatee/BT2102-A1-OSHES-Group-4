@@ -21,6 +21,7 @@ class Item:
 
 
 class ServiceStatus(enum.Enum):
+    Empty = ''
     WaitingForApproval = 'Waiting for approval'
     InProgress = 'In progress'
     Completed = 'Completed'

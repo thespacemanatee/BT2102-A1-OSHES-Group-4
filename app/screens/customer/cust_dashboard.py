@@ -190,7 +190,7 @@ def customer_screen():
             try:
                 index = values[PENDING_REQUESTS_TABLE][0]
                 request = pending_table_data[index]
-                make_payment_popup(request.request_id, [_update_service_requests])
+                make_payment_popup(request, [_update_service_requests])
             except IndexError:
                 continue
 
@@ -199,7 +199,7 @@ def customer_screen():
                 index = values[SERVICE_REQUESTS_TABLE][0]
                 request = requests_table_data[index]
                 if request.request_status == RequestStatus.Submitted.value:
-                    cancel_request_popup(request.request_id, [_update_service_requests])
+                    cancel_request_popup(request, [_update_service_requests])
             except IndexError:
                 continue
 
