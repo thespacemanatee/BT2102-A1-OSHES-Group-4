@@ -198,7 +198,7 @@ def customer_screen():
             try:
                 index = values[SERVICE_REQUESTS_TABLE][0]
                 request = requests_table_data[index]
-                if request.request_status == RequestStatus.Submitted.value:
+                if request.request_status in (RequestStatus.Submitted.value, RequestStatus.InProgress.value):
                     cancel_request_popup(request, [_update_service_requests])
             except IndexError:
                 continue
