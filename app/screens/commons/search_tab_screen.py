@@ -46,11 +46,11 @@ def search_tab_screen(table_data, table_headers, col_widths, admin=False):
 
     table_layout = search_table_component(table_data, table_headers, col_widths)
 
-    return [[sg.Text('Search by:', font=('Arial', 24), pad=(0, 0))],
+    return [[sg.Text('Search by:', font=('Arial', 20), pad=(0, 0))],
             category_row,
             model_row,
             item_search_component() if admin else [],
-            [sg.Text('Filters:', font=('Arial', 24), pad=(0, 10))],
+            [sg.Text('Filters:', font=('Arial', 20), pad=(0, 10))],
             [price_filter_row, colors_filter_row, factories_filter_row],
             [power_supplies_filter_row, production_years_filter_row],
             [sg.Button('Search', key=SEARCH_BUTTON, size=10, pad=((5, 5), (25, 0))),

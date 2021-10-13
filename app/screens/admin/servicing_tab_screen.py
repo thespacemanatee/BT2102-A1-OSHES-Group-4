@@ -15,7 +15,7 @@ def servicing_tab_screen(under_service_data, waiting_payment_data):
     waiting_payment_data = get_requests_table_data(waiting_payment_data, admin=True)
 
     return [
-        [sg.Text('Items under service', font=('Arial', 24))],
+        [sg.Text('Items under service', font=('Arial', 20))],
         [sg.Text('Click on a request to view options.')],
         [base_table_component(values=under_service_data, headings=REQUESTS_TABLE_HEADERS,
                               key=UNDER_SERVICE_TABLE,
@@ -23,7 +23,7 @@ def servicing_tab_screen(under_service_data, waiting_payment_data):
                               tooltip='Items under service',
                               pad=(10, 10)
                               )],
-        [sg.Text('Waiting for payment', font=('Arial', 24))],
+        [sg.Text('Waiting for payment', font=('Arial', 20))],
         [base_table_component(values=waiting_payment_data, headings=REQUESTS_TABLE_HEADERS,
                               key=WAITING_PAYMENT_TABLE,
                               col_widths=REQUESTS_TABLE_PADDING,

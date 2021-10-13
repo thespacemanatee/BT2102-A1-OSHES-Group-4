@@ -98,7 +98,7 @@ def customer_screen():
     request_layout = purchase_history_tab_screen(history)
 
     logout_layout = [[
-        sg.Text(f'Welcome, {user.name}.', font=('Arial', 28)),
+        sg.Text(f'Welcome, {user.name}.', font=('Arial', 26)),
         sg.Button('Log Out'),
     ]]
 
