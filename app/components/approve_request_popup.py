@@ -18,7 +18,7 @@ def approve_request_popup(request, callbacks=None):
         [sg.Button('Okay')], top_children=[
             [sg.Text(f'Request ID: {request.request_id} is awaiting payment from customer.')],
         ])
-    window = setup_window('Make Payment', layout, keep_on_top=True)
+    window = setup_window('Approve Request', layout, keep_on_top=True)
     while True:
         event, values = window.read()
         if event in ['Cancel', 'Okay', sg.WIN_CLOSED]:
