@@ -307,15 +307,14 @@ def find_request_by_id(request_id):
 
 
 def insert_request_by_id(item, customer_id, request_status, service_status, service_amount):
-    service_payment_date = date.today() + timedelta(days=10) if service_amount > 0 else None
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('UPDATE item SET service_status = %s WHERE id = %s', (service_status, item['id']))
         cursor.execute(
-            'INSERT INTO request (service_amount, service_payment_date, request_status, request_date, customer_id, '
+            'INSERT INTO request (service_amount, request_status, request_date, customer_id, '
             'item_id) '
-            'VALUES (%s, %s, %s, %s, %s, %s)',
-            (service_amount, service_payment_date, request_status, date.today(), customer_id, item['id']))
+            'VALUES (%s, %s, %s, %s, %s)',
+            (service_amount, request_status, date.today(), customer_id, item['id']))
         mysql_client.commit()
         cursor.close()
 
@@ -332,6 +331,14 @@ def update_request_status_by_id(request_id, request_status):
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
         cursor.execute('UPDATE request SET request_status = %s WHERE id = %s', (request_status, request_id))
+        mysql_client.commit()
+        cursor.close()
+
+
+def update_service_payment_date_by_id(request_id, payment_date):
+    with mysql_client.cursor() as cursor:
+        cursor.execute('USE `db.OSHES`;')
+        cursor.execute('UPDATE request SET service_payment_date = %s WHERE id = %s', (payment_date, request_id))
         mysql_client.commit()
         cursor.close()
 
@@ -393,7 +400,9 @@ def update_service_status_by_id(item_id, service_status):
 def cancel_requests_after_deadline():
     with mysql_client.cursor() as cursor:
         cursor.execute('USE `db.OSHES`;')
-        cursor.execute('UPDATE request SET request_status = %s WHERE service_payment_date < CURDATE()', ('Canceled',))
+        cursor.execute(
+            'UPDATE request SET request_status = %s WHERE DATE_ADD(request_date, INTERVAL 1 DAY) < CURDATE()',
+            ('Canceled',))
         mysql_client.commit()
         cursor.close()
 

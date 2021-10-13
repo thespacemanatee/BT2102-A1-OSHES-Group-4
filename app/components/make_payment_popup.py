@@ -1,7 +1,9 @@
+from datetime import date
+
 import PySimpleGUI as sg
 
 from app.components.centered_component import centered_component
-from app.database.utils import update_request_status_by_id
+from app.database.utils import update_request_status_by_id, update_service_payment_date_by_id
 from app.models.request import RequestStatus
 from app.utils import setup_window
 
@@ -29,6 +31,7 @@ def make_payment_popup(request_id, callbacks=None):
 
         elif event == 'Confirm Payment':
             update_request_status_by_id(request_id, RequestStatus.InProgress.value)
+            update_service_payment_date_by_id(request_id, date.today())
             for callback in callbacks:
                 callback()
             break
