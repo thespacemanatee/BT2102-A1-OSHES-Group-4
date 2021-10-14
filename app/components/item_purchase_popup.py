@@ -59,7 +59,8 @@ def item_purchase_popup(product, item, callbacks=None):
                 quantity = int(values[QUANTITY_VAL])
                 if quantity > item['Stock']:
                     popup[WRONG_ENTRY].update('Quantity exceeded.', text_color='red')
-
+                elif quantity <= 0:
+                    popup[WRONG_ENTRY].update('Enter a positive Number > 0', text_color='red')
                 else:
                     purchase_item(user_id, {
                         'Category': item['Category'],
