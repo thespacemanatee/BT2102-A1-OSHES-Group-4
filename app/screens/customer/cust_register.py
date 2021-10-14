@@ -19,7 +19,7 @@ WRONG_ENTRY = 'wrong_entry'
 
 def customer_register_screen(intro_window):
     layout = [[sg.Column([
-        [sg.Text('Username:')],
+        [sg.Text('Customer ID:')],
         [sg.Input(key=USERNAME_VAL, size=53)],
         [sg.Text('Name:')],
         [sg.Input(key=NAME_VAL, size=53)],
@@ -38,7 +38,7 @@ def customer_register_screen(intro_window):
          sg.Button('Cancel', size=25)]
     ], pad=25)]]
 
-    window = setup_window('Administrator Registration', layout, keep_on_top=True)
+    window = setup_window('Customer Registration', layout, keep_on_top=True)
 
     while True:
         event, values = window.read()
