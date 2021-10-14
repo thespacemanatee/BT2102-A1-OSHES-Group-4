@@ -19,7 +19,7 @@ WRONG_ENTRY = 'wrong_entry'
 
 def customer_register_screen(intro_window):
     layout = [[sg.Column([
-        [sg.Text('Username:')],
+        [sg.Text('Customer ID:')],
         [sg.Input(key=USERNAME_VAL, size=53)],
         [sg.Text('Name:')],
         [sg.Input(key=NAME_VAL, size=53)],
