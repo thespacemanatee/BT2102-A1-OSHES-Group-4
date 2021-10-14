@@ -40,7 +40,16 @@ def administrator_login_screen(intro_window):
 
         elif event == 'Login':
             administrator = validate_administrator_login(values[ID_VAL], values[PASSWORD_VAL])
-            if administrator:
+            if values[ID_VAL] == '' and values[PASSWORD_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your Login Information', text_color='red')    
+            elif values[ID_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your Administrator ID.', text_color='red')
+            elif values[PASSWORD_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your password.', text_color='red')
+            elif administrator:
                 intro_window.close()
                 window.close()
                 set_current_user(administrator)

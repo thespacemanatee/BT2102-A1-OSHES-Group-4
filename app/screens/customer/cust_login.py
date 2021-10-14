@@ -41,7 +41,16 @@ def customer_login_screen(intro_window):
         elif event == 'Login':
             customer = validate_customer_login(values[ID_VAL],
                                                values[PASSWORD_VAL])
-            if customer:
+            if values[ID_VAL] == '' and values[PASSWORD_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your Login Information', text_color='red')    
+            elif values[ID_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your Customer ID.', text_color='red')
+            elif values[PASSWORD_VAL] == '':
+                window[WRONG_ENTRY].update(
+                    'Please enter your password.', text_color='red')
+            elif customer:
                 intro_window.close()
                 window.close()
                 set_current_user(customer)

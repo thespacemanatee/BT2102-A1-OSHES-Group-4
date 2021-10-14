@@ -38,7 +38,7 @@ def customer_register_screen(intro_window):
          sg.Button('Cancel', size=25)]
     ], pad=25)]]
 
-    window = setup_window('Administrator Registration', layout, keep_on_top=True)
+    window = setup_window('Customer Registration', layout, keep_on_top=True)
 
     while True:
         event, values = window.read()
