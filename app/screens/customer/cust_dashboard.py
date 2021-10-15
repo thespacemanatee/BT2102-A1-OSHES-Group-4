@@ -64,6 +64,10 @@ def customer_screen():
                 model = values[MODEL_OPTION] if values[MODEL_RADIO] else None
                 price_min = int(values[PRICE_MIN_VAL]) if values[PRICE_CHECKBOX] else None
                 price_max = int(values[PRICE_MAX_VAL]) if values[PRICE_CHECKBOX] else None
+                if price_min <= 0 or price_max <= 0:
+                    raise ValueError("NegativePrice")
+                elif price_min > price_max:
+                    raise ValueError('IllegalPriceRange')
                 color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
                 factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
                 power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
@@ -71,8 +75,13 @@ def customer_screen():
                 return get_filtered_results(category=category, model=model, price_min=price_min,
                                             price_max=price_max, color=color, factory=factory,
                                             power_supply=power_supply, production_year=production_year)
-            except ValueError:
-                window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
+            except ValueError as e:
+                if str(e) == 'IllegalPriceRange':
+                    window[WRONG_ENTRY].update('Min price should be lower than max price.', text_color='red')
+                elif str(e) == 'NegativePrice':
+                    window[WRONG_ENTRY].update('Please enter positive values >0 for min and max prices', text_color='red')
+                else:
+                    window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
 
     def _update_search_table():
         nonlocal table_data, item_data
