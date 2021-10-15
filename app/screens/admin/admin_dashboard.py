@@ -62,9 +62,9 @@ def administrator_screen():
                 price_min = int(values[PRICE_MIN_VAL]) if values[PRICE_CHECKBOX] else None
                 price_max = int(values[PRICE_MAX_VAL]) if values[PRICE_CHECKBOX] else None
                 if price_min <= 0 or price_max <= 0:
-                    raise ValueError("NegativePrice")
+                     raise ValueError("NegativePrice")
                 elif price_min > price_max:
-                    raise ValueError('IllegalPriceRange')
+                     raise ValueError('IllegalPriceRange')
                 color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
                 factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
                 power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
