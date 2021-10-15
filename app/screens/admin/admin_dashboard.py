@@ -62,9 +62,9 @@ def administrator_screen():
                 price_min = int(values[PRICE_MIN_VAL]) if values[PRICE_CHECKBOX] else None
                 price_max = int(values[PRICE_MAX_VAL]) if values[PRICE_CHECKBOX] else None
                 if price_min <= 0 or price_max <= 0:
-                     raise ValueError("NegativePrice")
+                    raise ValueError("NegativePrice")
                 elif price_min > price_max:
-                     raise ValueError('IllegalPriceRange')
+                    raise ValueError('IllegalPriceRange')
                 color = values[COLOR_CHECKBOX_VAL] if values[COLOR_CHECKBOX] else None
                 factory = values[FACTORY_CHECKBOX_VAL] if values[FACTORY_CHECKBOX] else None
                 power_supply = values[POWER_SUPPLY_CHECKBOX_VAL] if values[POWER_SUPPLY_CHECKBOX] else None
@@ -76,9 +76,11 @@ def administrator_screen():
                 if str(e) == 'IllegalPriceRange':
                     window[WRONG_ENTRY].update('Min price should be lower than max price.', text_color='red')
                 elif str(e) == 'NegativePrice':
-                    window[WRONG_ENTRY].update('Please enter positive values >0 for min and max prices', text_color='red')
+                    window[WRONG_ENTRY].update('Please enter positive values >0 for min and max prices',
+                                               text_color='red')
                 else:
-                    window[WRONG_ENTRY].update('Please specify a number for min and max price values.', text_color='red')
+                    window[WRONG_ENTRY].update('Please specify a number for min and max price values.',
+                                               text_color='red')
 
     def _update_service_requests():
         nonlocal under_service_data, waiting_payment_data, completed_requests_data
